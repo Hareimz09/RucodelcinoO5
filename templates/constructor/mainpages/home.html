@@ -77,39 +77,45 @@
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-brand-700">примеры работ</p>
-                <h2 class="text-2xl font-semibold text-slate-900">Готовые образы для виртуальной примерки</h2>
-                <p class="text-sm text-slate-600">Выберите вариант и сразу переходите к примерке в нужном конструкторе.</p>
+                <h2 class="text-2xl font-semibold text-slate-900">Три готовых варианта шапок</h2>
+                <p class="text-sm text-slate-600">Теперь блок показывает только шапки: разные ткани, настроение и силуэт.</p>
             </div>
         </div>
         <div class="grid gap-4 md:grid-cols-3">
             <article class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 space-y-3">
-                <div class="h-40 rounded-xl bg-gradient-to-br from-slate-100 to-brand-50 flex items-center justify-center text-sm text-slate-500">
-                    3D бини «Северный ветер»
+                <div class="overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                    <img src="{% static 'img/hats/home-merino.svg' %}" alt="Графитовая шапка из мериноса" class="h-40 w-full object-cover">
                 </div>
-                <h3 class="text-lg font-semibold text-slate-900">Бини из мериноса</h3>
-                <p class="text-sm text-slate-600">Глубокий графит, плотная вязка, минималистичный силуэт.</p>
+                <div class="space-y-1">
+                    <h3 class="text-lg font-semibold text-slate-900">Меринос · графит</h3>
+                    <p class="text-sm text-slate-600">Плотная классическая бини с мягкой шерстяной фактурой и спокойным городским оттенком.</p>
+                </div>
                 <a href="{% url 'hats_constructor' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800">
                     Примерить
                     <span aria-hidden="true">→</span>
                 </a>
             </article>
             <article class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 space-y-3">
-                <div class="h-40 rounded-xl bg-gradient-to-br from-slate-100 to-brand-50 flex items-center justify-center text-sm text-slate-500">
-                    3D серьги «Линия»
+                <div class="overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                    <img src="{% static 'img/hats/home-boucle.svg' %}" alt="Красная шапка букле с помпоном" class="h-40 w-full object-cover">
                 </div>
-                <h3 class="text-lg font-semibold text-slate-900">Минималистичные серьги</h3>
-                <p class="text-sm text-slate-600">Сталь, геометрия, лёгкая матовая фактура.</p>
-                <a href="{% url 'jewelry_constructor' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800">
+                <div class="space-y-1">
+                    <h3 class="text-lg font-semibold text-slate-900">Букле · коралл</h3>
+                    <p class="text-sm text-slate-600">Акцентная шапка с объёмной поверхностью и мягким верхним декором для более уютного образа.</p>
+                </div>
+                <a href="{% url 'hats_constructor' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800">
                     Примерить
                     <span aria-hidden="true">→</span>
                 </a>
             </article>
             <article class="rounded-2xl border border-slate-200 bg-white shadow-sm p-4 space-y-3">
-                <div class="h-40 rounded-xl bg-gradient-to-br from-slate-100 to-brand-50 flex items-center justify-center text-sm text-slate-500">
-                    3D берёт «Марсель»
+                <div class="overflow-hidden rounded-xl border border-slate-100 bg-slate-50">
+                    <img src="{% static 'img/hats/home-cashmere.svg' %}" alt="Удлинённая кашемировая шапка в холодном синем оттенке" class="h-40 w-full object-cover">
                 </div>
-                <h3 class="text-lg font-semibold text-slate-900">Тёплый берёт</h3>
-                <p class="text-sm text-slate-600">Мягкая пряжа, пастельный пудровый оттенок и аккуратный ободок.</p>
+                <div class="space-y-1">
+                    <h3 class="text-lg font-semibold text-slate-900">Кашемир · холодный синий</h3>
+                    <p class="text-sm text-slate-600">Более вытянутый slouchy-силуэт с деликатной фактурой для расслабленной посадки.</p>
+                </div>
                 <a href="{% url 'hats_constructor' %}" class="inline-flex items-center gap-2 text-sm font-semibold text-brand-700 hover:text-brand-800">
                     Примерить
                     <span aria-hidden="true">→</span>
