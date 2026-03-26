@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Команда O5 — о проекте{% endblock %}
+
+{% block content %}
+<section class="space-y-10">
+    <div class="bg-white/90 border border-brand-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row md:items-center gap-6 md:gap-10">
+            <div class="flex-1 space-y-3">
+                <p class="text-xs font-semibold tracking-[0.18em] uppercase text-brand-700">команда o5</p>
+                <h1 class="text-3xl sm:text-4xl font-semibold leading-tight text-slate-900">
+                    Люди, которые собирают этот конструктор мечты
+                </h1>
+                <p class="text-slate-600 text-base">
+                    Мы экспериментируем с 3D, машинным зрением и простыми интерфейсами, чтобы у вас оставалось
+                    больше времени на творчество, а не на долгую переписку с мастером.
+                </p>    
+            </div>
+            <div class="w-full md:w-[320px] bg-brand-50 border border-brand-100 rounded-2xl p-4 space-y-2">
+                <p class="text-sm font-semibold text-slate-800">Что мы делаем?</p>
+                <ul class="text-sm text-slate-600 space-y-1 list-disc list-inside">
+                    <li>Переводим идеи в удобные цифровые инструменты.</li>
+                    <li>Настраиваем быстрые превью изделий без ожидания.</li>
+                    <li>Помогаем мастерам и покупателям говорить на одном языке.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+        {% comment %}Карточка участника{% endcomment %}
+        <article class="card-slide-up bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-brand-100 to-brand-500/50 flex items-center justify-center text-2xl font-semibold text-brand-900">
+                    ИЗ
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Зайков Илья</h3>
+                    <p class="text-sm text-slate-500">Frontend разроботчик</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Создает внешний интерфейс сайта. Делает, чтобы на разных устройствах сайт смотрелся красиво.
+            </p>
+        </article>
+
+        <article class="card-slide-up bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-100 to-brand-200 flex items-center justify-center text-2xl font-semibold text-brand-900">
+                    ДП
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Дмитриева Полина</h3>
+                    <p class="text-sm text-slate-500">Руководитель команды</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Следит, чтобы в команде сохранялся рабочий и дружеский настрой. Представляет команду.
+            </p>
+        </article>
+
+        <article class="card-slide-up bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-amber-100 to-brand-200 flex items-center justify-center text-2xl font-semibold text-brand-900">
+                    ПП
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Поташкина Полина</h3>
+                    <p class="text-sm text-slate-500">Дизайнер</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Описание в разроботке...
+            </p>
+        </article>
+
+        <article class="card-slide-up bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-sky-100 to-brand-200 flex items-center justify-center text-2xl font-semibold text-brand-900">
+                    НВ
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Нечаева Влада</h3>
+                    <p class="text-sm text-slate-500">PR-Менеджер</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Описание в разроботке...
+            </p>
+        </article>
+
+        <article class="card-slide-up bg-white border border-slate-100 rounded-2xl p-5 shadow-sm flex flex-col gap-4">
+            <div class="flex items-center gap-4">
+                <div class="h-20 w-20 rounded-2xl bg-gradient-to-br from-rose-100 to-brand-200 flex items-center justify-center text-2xl font-semibold text-brand-900">
+                    ХМ
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-slate-900">Хренников Макар</h3>
+                    <p class="text-sm text-slate-500">Backend разроботчик</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Описание в разроботке...
+            </p>
+        </article>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% with gradient_placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f1f5f9'/%3E%3Cstop offset='100%25' stop-color='%23ecfdf3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3C/svg%3E" %}
+<section class="grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-8">
+    <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Конструктор шапок</h2>
+
+        <form class="options-form space-y-4 bg-white rounded-2xl shadow-sm border border-slate-100 p-5" onsubmit="return false;">
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Цвет</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for color in hat_colors %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="hat_color" value="{{ color }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ color }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Пряжа</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for yarn in yarn_types %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="yarn_type" value="{{ yarn }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ yarn }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Модель</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for model in hat_models %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="hat_model" value="{{ model }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ model }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 text-xs text-slate-600 flex gap-1">
+                <span class="font-medium text-slate-700">Текущий вариант:</span>
+                <span id="hat-choice-summary" class="italic text-slate-500">—</span>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">3D-превью шапки</h3>
+                <span class="text-[11px] uppercase tracking-[0.18em] text-slate-400">прототип</span>
+            </div>
+            <div class="h-56 rounded-xl border border-dashed border-slate-300 flex items-center justify-center text-xs text-slate-500">
+                Здесь позже будет 3D-модель шапки.
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+            <div class="mb-2">
+                <h3 class="text-sm font-semibold">Виртуальная примерка</h3>
+                <p class="text-xs text-slate-500 mt-1">Слева — оригинал фото, справа — результат с шапкой, подогнанной нейросетью.</p>
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото пользователя</p>
+                    <div class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200">
+                        <img id="hat-user-photo" class="w-full h-auto object-cover" src="{{ gradient_placeholder }}" alt="Ваше фото">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото с шапкой</p>
+                    <div class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200">
+                        <img id="hat-ai-photo" class="w-full h-auto object-cover" src="{{ gradient_placeholder }}" alt="Результат с шапкой">
+                        <img id="hat-overlay" class="absolute left-1/2 -translate-x-1/2 w-3/4 pointer-events-none" src="{{ gradient_placeholder }}" alt="Шапка">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p class="text-xs text-slate-500">Постарайтесь, чтобы лицо было по центру кадра — так подгонка будет аккуратнее.</p>
+                <label class="inline-flex items-center justify-center px-4 py-2 rounded-full bg-slate-900 text-white text-xs font-medium cursor-pointer hover:bg-black transition">
+                    Загрузить фото
+                    <input type="file" id="hat-photo-input" accept="image/*" hidden>
+                </label>
+            </div>
+        </div>
+    </div>
+</section>
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateHatSummary() {
+        const color = document.querySelector('input[name="hat_color"]:checked')?.value;
+        const yarn = document.querySelector('input[name="yarn_type"]:checked')?.value;
+        const model = document.querySelector('input[name="hat_model"]:checked')?.value;
+        const summary = document.getElementById('hat-choice-summary');
+
+        summary.textContent = (color && yarn && model)
+            ? `${color} ${yarn.toLowerCase()} шапка, модель "${model}"`
+            : '—';
+    }
+
+    document.querySelectorAll('.options-form input').forEach((el) => {
+        el.addEventListener('change', updateHatSummary);
+    });
+    updateHatSummary();
+
+    const hatPhotoInput = document.getElementById('hat-photo-input');
+    const hatUserPhoto = document.getElementById('hat-user-photo');
+    const hatAiPhoto = document.getElementById('hat-ai-photo');
+
+    if (hatPhotoInput) {
+        hatPhotoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            hatUserPhoto.src = url;
+            hatAiPhoto.src = url;
+        });
+    }
+</script>
+{% endblock %}

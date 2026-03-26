@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}Дополнительные генерации{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+            <p class="text-sm text-slate-500">Покупка дополнительных AI-кредитов</p>
+            <h1 class="text-2xl font-semibold text-slate-900">Дополнительные генерации</h1>
+            <p class="mt-1 max-w-2xl text-sm text-slate-500">Заказы оформляются отдельно от личного кабинета. Можно купить сразу несколько генераций, загрузить чек и дождаться адресного подтверждения от администратора.</p>
+        </div>
+        <div class="app-actions lg:justify-end">
+            <a href="{% url 'account' %}" class="app-btn app-btn-secondary">Вернуться в кабинет</a>
+            <a href="{% url 'hats_constructor' %}" class="app-btn app-btn-primary">Перейти к примерке</a>
+        </div>
+    </div>
+
+    <div class="grid gap-6 xl:grid-cols-[minmax(0,0.95fr),minmax(320px,0.65fr)]">
+        <section class="app-card p-6 sm:p-7 space-y-6">
+            <div class="grid gap-3 sm:grid-cols-3">
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center">
+                    <p class="text-2xl font-semibold text-slate-900">{{ total_generations_remaining }}</p>
+                    <p class="mt-1 text-xs text-slate-500">доступно сейчас</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                    <p class="text-2xl font-semibold text-slate-900">{{ monthly_remaining }}</p>
+                    <p class="mt-1 text-xs text-slate-500">осталось из месячных</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                    <p class="text-2xl font-semibold text-slate-900">{{ extra_generations_available }}</p>
+                    <p class="mt-1 text-xs text-slate-500">оплаченных доп. кредитов</p>
+                </div>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Новый заказ</h2>
+                    <p class="mt-1 text-sm text-slate-500">Цена одной генерации — {{ extra_generation_price_rub }} ₽. Выберите количество и при необходимости сразу приложите чек.</p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" class="space-y-5">
+                    {% csrf_token %}
+                    <input type="hidden" name="form" value="buy_extra_generation">
+
+                    <div class="space-y-3">
+                        <label class="block text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Быстрый выбор</label>
+                        <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                            {% for preset in purchase_presets %}
+                                <button type="button" class="purchase-preset rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-left transition hover:border-slate-300 hover:bg-white" data-quantity="{{ preset.quantity }}">
+                                    <div class="text-sm font-semibold text-slate-900">{{ preset.quantity }} шт.</div>
+                                    <div class="mt-1 text-xs text-slate-500">{{ preset.total_price_rub }} ₽</div>
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="grid gap-4 sm:grid-cols-[180px,minmax(0,1fr)]">
+                        <div>
+                            <label for="purchase-quantity" class="mb-1 block text-xs font-semibold text-slate-600">Количество</label>
+                            <input id="purchase-quantity" name="quantity" type="number" min="1" max="100" value="{{ purchase_form.quantity }}" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200">
+                        </div>
+                        <div>
+                            <label for="purchase-note" class="mb-1 block text-xs font-semibold text-slate-600">Комментарий к оплате</label>
+                            <input id="purchase-note" name="payment_note" type="text" value="{{ purchase_form.payment_note }}" placeholder="Например: перевод по СБП, чек от 26.03" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="purchase-receipt" class="mb-1 block text-xs font-semibold text-slate-600">Чек при создании заказа — необязательно</label>
+                        <input id="purchase-receipt" name="receipt_image" type="file" accept="image/*" class="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white">
+                    </div>
+
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                        <div class="flex items-center justify-between gap-3">
+                            <span>Итого к оплате</span>
+                            <strong id="purchase-total" class="text-base text-slate-900">{{ purchase_total_price_rub }} ₽</strong>
+                        </div>
+                    </div>
+
+                    <div class="app-actions">
+                        <button type="submit" class="app-btn app-btn-accent">Создать заказ</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <aside class="space-y-6">
+            <section class="app-card p-6 space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Как это работает</h2>
+                </div>
+                <div class="space-y-3 text-sm text-slate-600">
+                    <p><strong class="text-slate-800">1.</strong> Создаёте заказ на нужное количество генераций.</p>
+                    <p><strong class="text-slate-800">2.</strong> После оплаты загружаете чек сразу в заказ.</p>
+                    <p><strong class="text-slate-800">3.</strong> Администратор подтверждает оплату именно для вашего аккаунта.</p>
+                    <p><strong class="text-slate-800">4.</strong> Кредиты сразу становятся доступны в примерке.</p>
+                </div>
+            </section>
+
+            <section class="app-card p-6 space-y-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-slate-900">Статусы заказа</h2>
+                </div>
+                <div class="space-y-2 text-sm text-slate-600">
+                    <p><span class="status-pill bg-slate-100 text-slate-700">Ожидает оплаты</span></p>
+                    <p><span class="status-pill bg-amber-50 text-amber-700">Чек отправлен</span></p>
+                    <p><span class="status-pill bg-emerald-50 text-emerald-700">Одобрено</span></p>
+                    <p><span class="status-pill bg-rose-50 text-rose-700">Отклонено</span></p>
+                </div>
+            </section>
+        </aside>
+    </div>
+
+    <section class="app-card p-6 sm:p-7 space-y-4">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <h2 class="text-lg font-semibold text-slate-900">История заказов</h2>
+                <p class="mt-1 text-sm text-slate-500">Здесь можно дозагрузить чек к любому активному заказу.</p>
+            </div>
+        </div>
+
+        {% if purchases %}
+            <div class="space-y-4">
+                {% for purchase in purchases %}
+                    <article class="rounded-[1.5rem] border border-slate-200 bg-slate-50/80 p-5 space-y-4">
+                        <div class="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                    <span>{{ purchase.created_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</span>
+                                    {% if purchase.receipt_uploaded_at %}
+                                        <span>чек загружен {{ purchase.receipt_uploaded_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</span>
+                                    {% endif %}
+                                    {% if purchase.approved_at %}
+                                        <span>подтверждено {{ purchase.approved_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</span>
+                                    {% endif %}
+                                </div>
+                                <h3 class="mt-2 text-lg font-semibold text-slate-900">{{ purchase.quantity }} × {{ purchase.unit_price_rub }} ₽ = {{ purchase.total_price_rub }} ₽</h3>
+                                {% if purchase.payment_note %}
+                                    <p class="mt-1 text-sm text-slate-600">Комментарий: {{ purchase.payment_note }}</p>
+                                {% endif %}
+                                {% if purchase.admin_comment %}
+                                    <p class="mt-1 text-sm text-slate-600">Ответ администратора: {{ purchase.admin_comment }}</p>
+                                {% endif %}
+                            </div>
+                            <span class="status-pill {% if purchase.status == 'paid' %}bg-emerald-50 text-emerald-700{% elif purchase.status == 'review' %}bg-amber-50 text-amber-700{% elif purchase.status == 'cancelled' %}bg-rose-50 text-rose-700{% else %}bg-slate-100 text-slate-600{% endif %}">{{ purchase.status_label }}</span>
+                        </div>
+
+                        {% if purchase.receipt_image %}
+                            <div class="grid gap-4 lg:grid-cols-[220px,minmax(0,1fr)] lg:items-start">
+                                <img src="{{ purchase.receipt_image.url }}" alt="Чек" class="max-h-56 rounded-2xl border border-slate-200 bg-white object-contain">
+                                <div class="space-y-2">
+                                    <a href="{{ purchase.receipt_image.url }}" target="_blank" rel="noopener" class="text-sm font-semibold text-brand-700 hover:text-brand-800">Открыть чек в полном размере</a>
+                                    <p class="text-sm text-slate-500">Можно заменить чек новым изображением, пока заказ не одобрен и не отклонён.</p>
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        {% if purchase.status != 'paid' and purchase.status != 'cancelled' %}
+                            <form method="post" enctype="multipart/form-data" class="space-y-4 rounded-2xl border border-slate-200 bg-white p-4">
+                                {% csrf_token %}
+                                <input type="hidden" name="form" value="upload_purchase_receipt">
+                                <input type="hidden" name="purchase_id" value="{{ purchase.id }}">
+                                <div class="grid gap-4 sm:grid-cols-[minmax(0,1fr),minmax(0,1fr)]">
+                                    <div>
+                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Чек</label>
+                                        <input name="receipt_image" type="file" accept="image/*" class="block w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm file:mr-3 file:rounded-full file:border-0 file:bg-slate-900 file:px-3 file:py-2 file:text-xs file:font-semibold file:text-white">
+                                    </div>
+                                    <div>
+                                        <label class="mb-1 block text-xs font-semibold text-slate-600">Комментарий к заказу</label>
+                                        <input name="payment_note" type="text" value="{{ purchase.payment_note }}" placeholder="Например: оплата по СБП" class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200">
+                                    </div>
+                                </div>
+                                <div class="app-actions">
+                                    <button type="submit" class="app-btn app-btn-secondary">Отправить чек на проверку</button>
+                                </div>
+                            </form>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-12 text-center">
+                <h3 class="font-semibold text-slate-900">Пока нет заказов</h3>
+                <p class="mt-2 text-sm text-slate-600">Создайте первый заказ на дополнительные генерации выше.</p>
+            </div>
+        {% endif %}
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const quantityInput = document.getElementById('purchase-quantity');
+    const totalEl = document.getElementById('purchase-total');
+    const unitPrice = {{ extra_generation_price_rub|default:0 }};
+    const presetButtons = document.querySelectorAll('.purchase-preset');
+
+    function clampQuantity(value) {
+      const parsed = Number(value);
+      if (!Number.isFinite(parsed) || parsed < 1) return 1;
+      if (parsed > 100) return 100;
+      return Math.round(parsed);
+    }
+
+    function syncUi() {
+      if (!quantityInput || !totalEl) return;
+      const quantity = clampQuantity(quantityInput.value);
+      quantityInput.value = quantity;
+      totalEl.textContent = `${quantity * unitPrice} ₽`;
+
+      presetButtons.forEach((button) => {
+        const isActive = Number(button.dataset.quantity) === quantity;
+        button.classList.toggle('border-slate-900', isActive);
+        button.classList.toggle('bg-white', isActive);
+      });
+    }
+
+    presetButtons.forEach((button) => {
+      button.addEventListener('click', function () {
+        if (!quantityInput) return;
+        quantityInput.value = button.dataset.quantity;
+        syncUi();
+      });
+    });
+
+    if (quantityInput) {
+      quantityInput.addEventListener('input', syncUi);
+      quantityInput.addEventListener('change', syncUi);
+    }
+
+    syncUi();
+  });
+</script>
+{% endblock %}

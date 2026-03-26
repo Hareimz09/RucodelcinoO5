@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% with gradient_placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f1f5f9'/%3E%3Cstop offset='100%25' stop-color='%23ecfdf3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3C/svg%3E" %}
+<section class="grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-8">
+    <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Конструктор украшений</h2>
+
+        <form class="options-form space-y-4 bg-white rounded-2xl shadow-sm border border-slate-100 p-5" onsubmit="return false;">
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Основа</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for base in bases %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="base" value="{{ base }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ base }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Длина</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for length in lengths %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="length" value="{{ length }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ length }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Фурнитура</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for f in fittings %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="checkbox" name="fittings" value="{{ f }}" class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ f }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 text-xs text-slate-600 flex gap-1">
+                <span class="font-medium text-slate-700">Текущий вариант:</span>
+                <span id="jewelry-choice-summary" class="italic text-slate-500">—</span>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">Превью украшения</h3>
+                <span class="text-[11px] uppercase tracking-[0.18em] text-slate-400">reference</span>
+            </div>
+            <div class="h-56 rounded-xl border border-slate-200 overflow-hidden bg-gradient-to-br from-slate-50 to-brand-50 flex items-center justify-center">
+                <canvas id="jewelry-preview-canvas" class="w-full h-full"></canvas>
+            </div>
+            <p class="mt-3 text-xs text-slate-500">Этот рендер отправляется на сервер как reference image для AI-примерки.</p>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+            <div class="mb-2">
+                <h3 class="text-sm font-semibold">Виртуальная примерка</h3>
+                <p class="text-xs text-slate-500 mt-1">Слева — фото пользователя, справа — результат с украшением. До завершения генерации справа остаётся плейсхолдер. Сервер сначала ставит reference по геометрии, затем AI делает фотореалистичную интеграцию.</p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 space-y-3">
+                {% if tryon_can_generate %}
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <p>AI-примерка привязана к аккаунту. Каждая успешная генерация автоматически сохраняется в профиль.</p>
+                        <a href="{% url 'account' %}" class="text-xs font-semibold text-brand-700 hover:text-brand-800">Открыть мои работы</a>
+                    </div>
+                    <div class="app-actions sm:items-center sm:justify-between">
+                        <p id="jewelry-tryon-quota" class="text-xs font-semibold text-slate-700">Осталось {{ tryon_remaining }}: включено {{ tryon_monthly_remaining }} из {{ tryon_monthly_limit }} · доп. {{ tryon_extra_remaining }}</p>
+                        <a href="{{ tryon_purchase_url }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800">Купить генерации</a>
+                    </div>
+                {% elif request.user.is_authenticated and tryon_is_master_user %}
+                    <p>{{ tryon_disabled_reason }}</p>
+                    <a href="{% url 'account' %}" class="app-btn app-btn-secondary text-xs sm:w-auto">Открыть статистику</a>
+                {% else %}
+                    <p>{{ tryon_disabled_reason }}</p>
+                    <div class="app-actions">
+                        <a href="{{ tryon_login_url }}" class="app-btn app-btn-primary text-xs sm:w-auto">Войти</a>
+                        <a href="{% url 'registration' %}?next={{ request.path|urlencode }}" class="app-btn app-btn-secondary text-xs sm:w-auto">Регистрация</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото пользователя</p>
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="jewelry-user-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Ваше фото">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото с украшением</p>
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="jewelry-ai-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Результат с украшением">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="app-actions sm:items-center sm:justify-between">
+                    <p class="text-xs text-slate-500">Держите плечи и шею в кадре — так колье или чокер лягут аккуратнее.</p>
+                    <label class="app-btn app-btn-primary cursor-pointer text-xs sm:w-auto">
+                        Загрузить фото
+                        <input type="file" id="jewelry-photo-input" accept="image/*" hidden>
+                    </label>
+                </div>
+                <div class="app-actions sm:items-center">
+                    <button id="jewelry-generate-btn" type="button" class="app-btn app-btn-accent text-xs sm:w-auto">
+                        {% if tryon_can_generate %}Сделать AI-примерку{% else %}Генерация недоступна{% endif %}
+                    </button>
+                    <a id="jewelry-download-link" class="hidden app-btn app-btn-secondary text-xs sm:w-auto" href="#" download="jewelry-tryon.png">
+                        Скачать результат
+                    </a>
+                    <span id="jewelry-tryon-status" class="status-pill bg-slate-100 text-slate-600">
+                        Загрузите фото, затем запустите примерку.
+                    </span>
+                </div>
+                <p id="jewelry-tryon-warning" class="text-xs text-slate-500"></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/server_tryon.js' %}"></script>
+<script>
+    const JEWELRY_STORAGE_KEY = 'jewelryConstructorState';
+
+    const jewelryBaseColors = {
+        'Проволока': '#d4a373',
+        'Леска': '#cbd5e1',
+        'Тросик': '#94a3b8',
+        'Спандекс': '#334155',
+    };
+
+    function getJewelryState() {
+        try {
+            return JSON.parse(localStorage.getItem(JEWELRY_STORAGE_KEY) || '{}');
+        } catch (error) {
+            console.warn('Не удалось прочитать состояние конструктора украшений', error);
+            return {};
+        }
+    }
+
+    function persistJewelryState(updates = {}) {
+        const current = getJewelryState();
+        try {
+            localStorage.setItem(JEWELRY_STORAGE_KEY, JSON.stringify({ ...current, ...updates }));
+        } catch (error) {
+            console.warn('Не удалось сохранить состояние конструктора украшений', error);
+        }
+    }
+
+    function getSelectedJewelryOptions() {
+        return {
+            base: document.querySelector('input[name="base"]:checked')?.value || '',
+            length: document.querySelector('input[name="length"]:checked')?.value || '',
+            fittings: Array.from(document.querySelectorAll('input[name="fittings"]:checked')).map((el) => el.value),
+        };
+    }
+
+    function updateJewelrySummary() {
+        const { base, length, fittings } = getSelectedJewelryOptions();
+        const summary = document.getElementById('jewelry-choice-summary');
+        const parts = [];
+        if (base) parts.push(base);
+        if (length) parts.push(`длина ${length}`);
+        if (fittings.length) parts.push(`фурнитура: ${fittings.join(', ')}`);
+        summary.textContent = parts.length ? parts.join(', ') : '—';
+    }
+
+    function renderJewelryPreview() {
+        const canvas = document.getElementById('jewelry-preview-canvas');
+        if (!canvas) return;
+
+        const container = canvas.parentElement;
+        const dpr = Math.min(window.devicePixelRatio || 1, 2);
+        const width = container.clientWidth;
+        const height = container.clientHeight;
+        canvas.width = Math.floor(width * dpr);
+        canvas.height = Math.floor(height * dpr);
+
+        const ctx = canvas.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+
+        const { base, length, fittings } = getSelectedJewelryOptions();
+        const stroke = jewelryBaseColors[base] || '#94a3b8';
+        const centerX = width / 2;
+        const centerY = height * 0.42;
+        const radiusX = width * 0.26;
+        const radiusYMap = {
+            '10 см': height * 0.16,
+            '15 см': height * 0.22,
+            '20 см': height * 0.28,
+            '25 см': height * 0.34,
+        };
+        const radiusY = radiusYMap[length] || height * 0.22;
+        const lineWidth = base === 'Проволока' ? 4 : base === 'Тросик' ? 3 : 2.5;
+
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = lineWidth;
+        ctx.beginPath();
+        ctx.moveTo(centerX - radiusX, centerY);
+        ctx.bezierCurveTo(
+            centerX - radiusX * 0.9,
+            centerY + radiusY * 0.65,
+            centerX - radiusX * 0.35,
+            centerY + radiusY,
+            centerX,
+            centerY + radiusY,
+        );
+        ctx.bezierCurveTo(
+            centerX + radiusX * 0.35,
+            centerY + radiusY,
+            centerX + radiusX * 0.9,
+            centerY + radiusY * 0.65,
+            centerX + radiusX,
+            centerY,
+        );
+        ctx.stroke();
+
+        const beadCount = length === '25 см' ? 14 : length === '20 см' ? 12 : length === '15 см' ? 10 : 8;
+        for (let i = 0; i < beadCount; i += 1) {
+            const t = i / Math.max(beadCount - 1, 1);
+            const angle = Math.PI - t * Math.PI;
+            const x = centerX + Math.cos(angle) * radiusX;
+            const y = centerY + Math.sin(angle) * radiusY * 0.82;
+            const beadRadius = base === 'Проволока' ? 5 : 4;
+            ctx.fillStyle = i % 2 === 0 ? stroke : '#f8fafc';
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(x, y, beadRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        if (fittings.includes('Карабины')) {
+            ctx.strokeStyle = '#64748b';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(centerX + radiusX - 6, centerY - 6, 10, 14);
+        }
+
+        if (fittings.includes('Швензы')) {
+            ctx.strokeStyle = '#475569';
+            ctx.beginPath();
+            ctx.arc(centerX - radiusX - 10, centerY + 10, 8, 0, Math.PI, true);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(centerX + radiusX + 10, centerY + 10, 8, 0, Math.PI, true);
+            ctx.stroke();
+        }
+
+        if (fittings.includes('Штифты') || fittings.includes('Маскировочная бусина')) {
+            ctx.fillStyle = '#f59e0b';
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + radiusY - 4);
+            ctx.lineTo(centerX - 8, centerY + radiusY + 16);
+            ctx.lineTo(centerX + 8, centerY + radiusY + 16);
+            ctx.closePath();
+            ctx.fill();
+        }
+    }
+
+    function applyStoredJewelryState() {
+        const state = getJewelryState();
+        if (state.base) {
+            const radio = Array.from(document.querySelectorAll('input[name="base"]')).find((el) => el.value === state.base);
+            if (radio) radio.checked = true;
+        }
+        if (state.length) {
+            const radio = Array.from(document.querySelectorAll('input[name="length"]')).find((el) => el.value === state.length);
+            if (radio) radio.checked = true;
+        }
+        if (Array.isArray(state.fittings)) {
+            document.querySelectorAll('input[name="fittings"]').forEach((el) => {
+                el.checked = state.fittings.includes(el.value);
+            });
+        }
+        if (state.userPhotoDataUrl) {
+            const userPhoto = document.getElementById('jewelry-user-photo');
+            if (userPhoto) userPhoto.src = state.userPhotoDataUrl;
+        }
+    }
+
+    function syncJewelryState() {
+        const selections = getSelectedJewelryOptions();
+        persistJewelryState(selections);
+        updateJewelrySummary();
+        renderJewelryPreview();
+    }
+
+    document.querySelectorAll('.options-form input').forEach((el) => {
+        el.addEventListener('change', syncJewelryState);
+    });
+
+    applyStoredJewelryState();
+    updateJewelrySummary();
+    renderJewelryPreview();
+    window.addEventListener('resize', renderJewelryPreview);
+
+    const jewelryPhotoInput = document.getElementById('jewelry-photo-input');
+    const jewelryUserPhoto = document.getElementById('jewelry-user-photo');
+    if (jewelryPhotoInput) {
+        jewelryPhotoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const dataUrl = reader.result;
+                jewelryUserPhoto.src = dataUrl;
+                persistJewelryState({ userPhotoDataUrl: dataUrl });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        window.RucodelTryOn?.create({
+            category: 'jewelry',
+            photoInputId: 'jewelry-photo-input',
+            userPhotoId: 'jewelry-user-photo',
+            aiPhotoId: 'jewelry-ai-photo',
+            statusId: 'jewelry-tryon-status',
+            buttonId: 'jewelry-generate-btn',
+            downloadLinkId: 'jewelry-download-link',
+            warningId: 'jewelry-tryon-warning',
+            quotaId: 'jewelry-tryon-quota',
+            isAuthenticated: {{ request.user.is_authenticated|yesno:'true,false' }},
+            canGenerate: {{ tryon_can_generate|yesno:'true,false' }},
+            disabledReason: '{{ tryon_disabled_reason|escapejs }}',
+            remainingGenerations: {{ tryon_remaining }},
+            monthlyLimit: {{ tryon_monthly_limit }},
+            monthlyRemaining: {{ tryon_monthly_remaining }},
+            extraRemaining: {{ tryon_extra_remaining }},
+            loginUrl: '{{ tryon_login_url }}',
+            initialUserImage: getJewelryState().userPhotoDataUrl || null,
+            async getAccessoryImage() {
+                renderJewelryPreview();
+                return document.getElementById('jewelry-preview-canvas').toDataURL('image/png');
+            },
+            getSummary() {
+                return document.getElementById('jewelry-choice-summary')?.textContent?.trim() || '';
+            },
+            getSelections() {
+                return getSelectedJewelryOptions();
+            },
+            onUserImageChange(dataUrl) {
+                persistJewelryState({ userPhotoDataUrl: dataUrl });
+            },
+        });
+    });
+</script>
+{% endblock %}

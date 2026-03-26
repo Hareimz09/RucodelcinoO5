@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% load tz %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+<section class="space-y-6">
+    <div class="app-card p-5 sm:p-7">
+        <div class="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+            <div class="flex min-w-0 items-center gap-4">
+                <div class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-slate-900 text-lg font-semibold text-white">
+                    {{ user_initials }}
+                </div>
+                <div class="min-w-0">
+                    <h1 class="truncate text-2xl font-semibold text-slate-900">{{ user_display_name }}</h1>
+                    <p class="break-all text-sm text-slate-500">{{ user_email }}</p>
+                    {% if is_master_user %}
+                        <p class="mt-1 text-sm text-slate-500">Режим администратора: генерация отключена, доступны статистика и управление заказами.</p>
+                    {% else %}
+                        <p class="mt-1 text-sm text-slate-500">Включено {{ monthly_limit }} AI-примерок в месяц. Дополнительные генерации — {{ extra_generation_price_rub }} ₽ за 1.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if is_master_user %}
+                <div class="grid w-full gap-3 sm:grid-cols-2 xl:min-w-[560px] xl:grid-cols-3">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ master_stats.clients_total }}</p>
+                        <p class="mt-1 text-xs text-slate-500">клиентов</p>
+                    </div>
+                    <div class="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ master_stats.pending_receipts_count }}</p>
+                        <p class="mt-1 text-xs text-slate-500">чеков ждут проверки</p>
+                    </div>
+                    {% for stat in master_stats.cards|slice:":4" %}
+                        <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                            <p class="text-2xl font-semibold text-slate-900">{{ stat.count }}</p>
+                            <p class="mt-1 text-xs text-slate-500">{{ stat.label|lower }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="grid w-full gap-3 sm:grid-cols-2 xl:min-w-[680px] xl:grid-cols-4">
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ works_count }}</p>
+                        <p class="mt-1 text-xs text-slate-500">моих работ</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ monthly_used }}</p>
+                        <p class="mt-1 text-xs text-slate-500">использовано за месяц</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ monthly_remaining }}</p>
+                        <p class="mt-1 text-xs text-slate-500">включено осталось</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white px-4 py-4 text-center">
+                        <p class="text-2xl font-semibold text-slate-900">{{ extra_generations_available }}</p>
+                        <p class="mt-1 text-xs text-slate-500">доп. кредитов</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if is_master_user %}
+        <div class="grid gap-6 xl:grid-cols-[1.15fr,0.85fr]">
+            <section class="app-card p-6 sm:p-7 space-y-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                        <p class="text-sm text-slate-500">Панель администратора</p>
+                        <h2 class="text-xl font-semibold text-slate-900">Статистика и управление</h2>
+                    </div>
+                    <div class="app-actions sm:justify-end">
+                        <a href="{% url 'master_chat' %}" class="app-btn app-btn-primary">Чаты и заказы</a>
+                        <a href="{% url 'master_recovery_requests' %}" class="app-btn app-btn-secondary">Заявки на восстановление</a>
+                    </div>
+                </div>
+
+                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                    {% for stat in master_stats.cards %}
+                        <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{{ stat.label }}</p>
+                            <p class="mt-2 text-2xl font-semibold text-slate-900">{{ stat.count }}</p>
+                            <p class="mt-1 text-sm text-slate-500">расход сервера: {{ stat.cost_usd }} $</p>
+                        </article>
+                    {% endfor %}
+                </div>
+
+                <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 text-sm text-slate-600">
+                    Для администратора AI-примерки отключены. Вся работа ведётся через статистику, пользовательские чаты и проверку чеков по каждому клиенту отдельно.
+                </div>
+            </section>
+
+            <aside class="space-y-6">
+                <section class="app-card p-6 space-y-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Последние заказы на кредиты</h2>
+                        <p class="mt-1 text-sm text-slate-500">Кто загрузил чек и в каком статусе заявка.</p>
+                    </div>
+
+                    {% if master_stats.recent_receipts %}
+                        <div class="space-y-3">
+                            {% for purchase in master_stats.recent_receipts %}
+                                <article class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 space-y-3">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div class="min-w-0">
+                                            <p class="font-semibold text-slate-900">{{ purchase.user.get_full_name|default:purchase.user.email }}</p>
+                                            <p class="text-xs text-slate-500">{{ purchase.user.email }}</p>
+                                        </div>
+                                        <span class="status-pill {% if purchase.status == 'paid' %}bg-emerald-50 text-emerald-700{% elif purchase.status == 'review' %}bg-amber-50 text-amber-700{% elif purchase.status == 'cancelled' %}bg-rose-50 text-rose-700{% else %}bg-slate-100 text-slate-600{% endif %}">{{ purchase.status_label }}</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600">{{ purchase.quantity }} × {{ purchase.unit_price_rub }} ₽ = {{ purchase.total_price_rub }} ₽</p>
+                                    {% if purchase.receipt_image %}
+                                        <a href="{{ purchase.receipt_image.url }}" target="_blank" rel="noopener" class="text-sm font-semibold text-brand-700 hover:text-brand-800">Открыть чек</a>
+                                    {% endif %}
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-sm text-slate-600">Пока нет заказов.</p>
+                    {% endif %}
+                </section>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="app-btn app-btn-secondary w-full sm:w-auto">Выйти из аккаунта</button>
+                </form>
+            </aside>
+        </div>
+    {% else %}
+        <div class="grid gap-6 xl:grid-cols-[minmax(0,1.2fr),360px]">
+            <div class="space-y-6 min-w-0">
+                <section class="app-card p-6 sm:p-7 space-y-5">
+                    <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                        <div>
+                            <h2 class="text-xl font-semibold text-slate-900">Мои работы</h2>
+                            <p class="mt-1 text-sm text-slate-500">Все успешные AI-примерки сохраняются в профиле. Любую работу можно прикрепить к переписке с мастером.</p>
+                        </div>
+                        <div class="app-actions lg:justify-end">
+                            <a href="{% url 'hats_constructor' %}" class="app-btn app-btn-secondary">Новая шапка</a>
+                            <a href="{% url 'jewelry_constructor' %}" class="app-btn app-btn-accent">Новое украшение</a>
+                        </div>
+                    </div>
+
+                    {% if works %}
+                        <div class="space-y-5">
+                            {% for work in works %}
+                                <article class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-slate-50/70" id="work-{{ work.id }}">
+                                    <div class="border-b border-slate-200 bg-white px-5 py-4">
+                                        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                                            <div class="min-w-0">
+                                                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                                    <span class="status-pill bg-slate-100 text-slate-700">{{ work.category_label }}</span>
+                                                    <span>{{ work.created_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</span>
+                                                    {% if work.used_ai %}
+                                                        <span class="status-pill bg-emerald-50 text-emerald-700">AI</span>
+                                                    {% else %}
+                                                        <span class="status-pill bg-amber-50 text-amber-700">fallback</span>
+                                                    {% endif %}
+                                                    {% if work.consumed_extra_credit %}
+                                                        <span class="status-pill bg-violet-50 text-violet-700">списан доп. кредит</span>
+                                                    {% endif %}
+                                                </div>
+                                                <h3 class="mt-3 text-lg font-semibold text-slate-900">{{ work.summary|default:"Без описания" }}</h3>
+                                                {% if work.provider %}
+                                                    <p class="mt-1 text-xs text-slate-500">провайдер рендера: {{ work.provider }}</p>
+                                                {% endif %}
+                                            </div>
+                                            <div class="app-actions lg:justify-end">
+                                                <a href="{{ work.result_image.url }}" download class="app-btn app-btn-secondary">Скачать PNG</a>
+                                                <a href="{% url 'account' %}?work={{ work.id }}#chat-with-master" class="app-btn app-btn-soft">Обсудить с мастером</a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid gap-4 p-5 md:grid-cols-2">
+                                        <div class="space-y-2 min-w-0">
+                                            <p class="text-xs font-semibold text-slate-600">Исходное фото</p>
+                                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                                                <img src="{{ work.user_image.url }}" alt="Исходное фото" class="w-full h-auto object-cover">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2 min-w-0">
+                                            <p class="text-xs font-semibold text-slate-600">Результат примерки</p>
+                                            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                                                <img src="{{ work.result_image.url }}" alt="Результат примерки" class="w-full h-auto object-cover">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {% if work.warnings %}
+                                        <div class="px-5 pb-5">
+                                            <div class="rounded-2xl border border-amber-100 bg-amber-50 px-4 py-3 text-xs text-amber-800 space-y-1">
+                                                {% for warning in work.warnings %}
+                                                    <p>{{ warning }}</p>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% endif %}
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="rounded-3xl border border-dashed border-slate-200 bg-slate-50 px-5 py-12 text-center">
+                            <h3 class="font-semibold text-slate-900">У вас пока нет сохранённых работ</h3>
+                            <p class="mt-2 text-sm text-slate-600">После первой AI-примерки результат автоматически появится здесь.</p>
+                            <div class="app-actions mt-4 justify-center">
+                                <a href="{% url 'hats_constructor' %}" class="app-btn app-btn-secondary">Открыть шапки</a>
+                                <a href="{% url 'jewelry_constructor' %}" class="app-btn app-btn-accent">Открыть украшения</a>
+                            </div>
+                        </div>
+                    {% endif %}
+                </section>
+
+                <section id="chat-with-master" class="app-card p-6 sm:p-7 space-y-4">
+                    <div class="flex flex-wrap items-start justify-between gap-3">
+                        <div>
+                            <h2 class="text-xl font-semibold text-slate-900">Чат с мастером</h2>
+                            <p class="mt-1 text-sm text-slate-500">Можно отправить сообщение, прикрепить сохранённую работу или внешнюю ссылку.</p>
+                        </div>
+                        <span class="text-xs text-slate-500">{{ chat_message_count }} сообщений</span>
+                    </div>
+
+                    <div class="max-h-[460px] space-y-3 overflow-y-auto pr-1">
+                        {% if chat_messages %}
+                            {% for message in chat_messages %}
+                                <div class="flex items-start gap-3 {% if message.sender == 'user' %}justify-end{% endif %}">
+                                    <div class="max-w-[92%] space-y-2 rounded-2xl border px-4 py-3 {% if message.sender == 'user' %}border-brand-100 bg-brand-50{% else %}border-slate-200 bg-slate-50{% endif %}">
+                                        <div class="flex items-center gap-2 text-xs text-slate-500">
+                                            <span class="font-semibold text-slate-800">{% if message.sender == 'user' %}Вы{% else %}Мастер{% endif %}</span>
+                                            <span>{{ message.created_at|timezone:"Asia/Yekaterinburg"|date:"d.m H:i" }}</span>
+                                        </div>
+                                        {% if message.text %}
+                                            <p class="whitespace-pre-line text-slate-700">{{ message.text }}</p>
+                                        {% endif %}
+                                        {% if message.linked_generation %}
+                                            <div class="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-3">
+                                                <img src="{{ message.linked_generation.result_image.url }}" alt="Связанная работа" class="h-16 w-16 shrink-0 rounded-xl border border-slate-200 object-cover">
+                                                <div class="min-w-0">
+                                                    <p class="text-xs font-semibold text-slate-800">Работа #{{ message.linked_generation.id }} · {{ message.linked_generation.category_label }}</p>
+                                                    <p class="mt-1 line-clamp-2 text-xs text-slate-500">{{ message.linked_generation.summary|default:"Без описания" }}</p>
+                                                    <a href="{{ message.linked_generation.result_image.url }}" target="_blank" rel="noopener" class="mt-2 inline-flex text-xs font-semibold text-brand-700 hover:text-brand-800">Открыть результат</a>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                        {% if message.external_reference_url %}
+                                            <div class="rounded-2xl border border-slate-200 bg-white px-3 py-2 text-xs text-slate-600">
+                                                <span class="font-semibold text-slate-800">Ссылка:</span>
+                                                <a href="{{ message.external_reference_url }}" target="_blank" rel="noopener" class="break-all text-brand-700 hover:text-brand-800">{{ message.external_reference_url }}</a>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-slate-600">Пока нет сообщений. Напишите мастеру, чтобы начать диалог.</p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" class="space-y-3">
+                        {% csrf_token %}
+                        <input type="hidden" name="form" value="chat">
+                        <div class="grid gap-3 lg:grid-cols-2">
+                            <div>
+                                <label for="linked_generation_id" class="mb-1 block text-xs font-semibold text-slate-600">Прикрепить работу из профиля</label>
+                                <select id="linked_generation_id" name="linked_generation_id" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200">
+                                    <option value="">Без прикрепления</option>
+                                    {% for work in chat_reference_works %}
+                                        <option value="{{ work.id }}" {% if chat_form.linked_generation_id == work.id|stringformat:'s' %}selected{% endif %}>#{{ work.id }} · {{ work.category_label }} · {{ work.created_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div>
+                                <label for="external_reference_url" class="mb-1 block text-xs font-semibold text-slate-600">Или вставить ссылку</label>
+                                <input id="external_reference_url" name="external_reference_url" type="url" value="{{ chat_form.external_reference_url }}" placeholder="https://..." class="w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200">
+                            </div>
+                        </div>
+                        <div class="app-actions sm:items-center">
+                            <input name="message" type="text" value="{{ chat_form.message }}" placeholder="Написать сообщение" class="min-w-0 flex-1 rounded-full border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-200" autocomplete="off">
+                            <button type="submit" class="app-btn app-btn-primary sm:w-auto">Отправить</button>
+                        </div>
+                        {% if message_error %}
+                            <p class="text-xs text-rose-600">{{ message_error }}</p>
+                        {% endif %}
+                    </form>
+                </section>
+            </div>
+
+            <aside class="space-y-6">
+                <section class="app-card p-6 space-y-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Лимиты и правила</h2>
+                        <p class="mt-1 text-sm text-slate-500">Короткая сводка по вашему тарифу и сохранению работ.</p>
+                    </div>
+                    <div class="space-y-3 text-sm text-slate-600">
+                        <p><strong class="text-slate-800">Включено:</strong> {{ monthly_limit }} генераций в месяц. Сейчас осталось {{ monthly_remaining }}.</p>
+                        <p><strong class="text-slate-800">Дополнительно:</strong> {{ extra_generations_available }} уже оплаченных кредитов.</p>
+                        <p><strong class="text-slate-800">Сохранение:</strong> каждая успешная генерация автоматически попадает в раздел «Мои работы».</p>
+                    </div>
+                </section>
+
+                <section class="app-card p-6 space-y-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-slate-900">Дополнительные генерации</h2>
+                        <p class="mt-1 text-sm text-slate-500">Покупка вынесена на отдельную страницу, чтобы кабинет оставался чище и быстрее.</p>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-4 space-y-2">
+                        <div class="flex items-center justify-between gap-3 text-sm">
+                            <span class="text-slate-500">Доступно сейчас</span>
+                            <span class="font-semibold text-slate-900">{{ extra_generations_available }}</span>
+                        </div>
+                        <div class="flex items-center justify-between gap-3 text-sm">
+                            <span class="text-slate-500">Цена за 1 генерацию</span>
+                            <span class="font-semibold text-slate-900">{{ extra_generation_price_rub }} ₽</span>
+                        </div>
+                    </div>
+                    <div class="app-actions">
+                        <a href="{% url 'extra_generations' %}" class="app-btn app-btn-accent">Перейти к покупке</a>
+                    </div>
+
+                    {% if purchases %}
+                        <div class="space-y-3 border-t border-slate-200 pt-4">
+                            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">Последние заказы</p>
+                            {% for purchase in purchases %}
+                                <article class="rounded-2xl border border-slate-200 bg-white px-4 py-4">
+                                    <div class="flex items-start justify-between gap-3">
+                                        <div>
+                                            <p class="font-semibold text-slate-900">{{ purchase.quantity }} × {{ purchase.unit_price_rub }} ₽ = {{ purchase.total_price_rub }} ₽</p>
+                                            <p class="mt-1 text-xs text-slate-500">{{ purchase.created_at|timezone:"Asia/Yekaterinburg"|date:"d.m.Y H:i" }}</p>
+                                        </div>
+                                        <span class="status-pill {% if purchase.status == 'paid' %}bg-emerald-50 text-emerald-700{% elif purchase.status == 'review' %}bg-amber-50 text-amber-700{% elif purchase.status == 'cancelled' %}bg-rose-50 text-rose-700{% else %}bg-slate-100 text-slate-600{% endif %}">{{ purchase.status_label }}</span>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </section>
+
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="app-btn app-btn-secondary w-full sm:w-auto">Выйти из аккаунта</button>
+                </form>
+            </aside>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

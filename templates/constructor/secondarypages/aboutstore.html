@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}О магазине и конструкторе{% endblock %}
+
+{% block content %}
+<section class="space-y-10">
+    <div class="bg-white/90 border border-slate-100 rounded-3xl p-6 sm:p-8 shadow-sm">
+        <p class="text-xs font-semibold tracking-[0.18em] uppercase text-brand-700">о магазине</p>
+        <div class="mt-3 grid gap-6 md:grid-cols-[1.4fr,1fr] md:items-start">
+            <div class="space-y-3">
+                <h1 class="text-3xl sm:text-4xl font-semibold leading-tight">Рукоделкино — больше, чем склад пряжи</h1>
+                <p class="text-slate-600 text-base leading-relaxed">
+                    Мы подбираем материалы, фурнитуру и готовые наборы для вязания так, чтобы они дополняли друг друга.
+                    Конструктор помогает собрать идею: выбрать форму, цвет, пряжу и сразу показать мастеру, что вы
+                    задумали. Можно сохранить эскиз, отправить в чат или заказать изготовление.
+                </p>
+            </div>
+            <div class="grid gap-3 sm:grid-cols-2">
+                <div class="rounded-2xl border border-brand-100 bg-brand-50 p-4">
+                    <p class="text-sm font-semibold text-slate-800">Для покупателей</p>
+                    <p class="text-sm text-slate-600 mt-2">Виртуальная примерка, готовые подборки оттенков и быстрые
+                        консультации с мастером.</p>
+                </div>
+                <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                    <p class="text-sm font-semibold text-slate-800">Для мастеров</p>
+                    <p class="text-sm text-slate-600 mt-2">Чёткие технические задания, 3D-превью изделия и история
+                        согласований в одном месте.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid gap-6 md:grid-cols-3">
+        <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-3">
+            <div class="text-sm font-semibold text-slate-800">Каталог и конструктор</div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Ассортимент обновляется под сезоны. Все цвета и фактуры сразу доступны в конструкторе, поэтому заказчик
+                видит реальную палитру и варианты отделки.
+            </p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-3">
+            <div class="text-sm font-semibold text-slate-800">Виртуальная примерка</div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Загружаете фото — нейросеть подгоняет выбранную шапку или украшение. Это помогает заранее понять посадку
+                и скорректировать детали, не тратя время мастера.
+            </p>
+        </div>
+        <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-3">
+            <div class="text-sm font-semibold text-slate-800">Сервис и поддержка</div>
+            <p class="text-sm text-slate-600 leading-relaxed">
+                Общайтесь с мастером в личном кабинете, отслеживайте статус заказа и получайте рекомендации по уходу за
+                изделиями прямо в профиле.
+            </p>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12">
+
+    <h1 class="text-3xl font-semibold mb-6 tracking-wide">
+        Контакты
+    </h1>
+
+    <div class="space-y-4 mb-10">
+        <p class="text-lg">
+            Если у вас возникли вопросы по товарам, доставке или сотрудничеству — свяжитесь с нами удобным способом.
+        </p>
+
+        <div class="space-y-2">
+            <p class="text-base">
+                <span class="font-medium">Email:</span>
+                <a href="mailto:info@rukodelkino.ru" class="text-blue-600 hover:underline">erkdl@yandex.ru</a>
+            </p>
+
+            <p class="text-base">
+                <span class="font-medium">Телефон:</span>
+                <a href="tel:+79999999999" class="text-blue-600 hover:underline">+7 343 378-77-77</a>
+            </p>
+
+            <p class="text-base">
+                <span class="font-medium">Адрес:</span>
+                Екатеринбург, Проспект Ленина, 22а
+            </p>
+
+            <p class="text-base">
+                <span class="font-medium">Вход:</span>
+                В арке между цветочным магазином "Фан Фан Тюльпан" и аптекой "Планета Здоровья" 
+            </p>
+
+            <p class="text-base">
+                <span class="font-medium">График работы магазина:</span>
+                ПН-ВС с 10:00 до 20:00 без перерывов и выходных
+            </p>
+        </div>
+
+    </div>
+
+    <h1 class="text-3xl font-semibold mb-6 tracking-wide">
+        Социальные сети
+    </h1>
+
+    <h1 class="text-3xl font-semibold mb-6 tracking-wide">
+        Сообщить об ошибке
+    </h1>
+
+    <div class="bg-white shadow rounded-xl p-6 border border-slate-200">
+
+        <form action="#" method="post" class="space-y-4">
+            {% csrf_token %}
+
+            <div>
+                <label class="block mb-1 text-sm font-medium text-slate-700">Ваше имя</label>
+                <input type="text" name="name" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" required>
+            </div>
+
+            <div>
+                <label class="block mb-1 text-sm font-medium text-slate-700">Email</label>
+                <input type="email" name="email" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" required>
+            </div>
+
+            <div>
+                <label class="block mb-1 text-sm font-medium text-slate-700">Сообщение</label>
+                <textarea name="message" rows="4" class="w-full border rounded-md px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200" required></textarea>
+            </div>
+
+            <button type="submit"
+                    class="px-5 py-2 bg-black text-white rounded-md hover:bg-blue-700 transition">
+                Отправить
+            </button>
+        </form>
+    </div>
+
+</div>
+{% endblock %}

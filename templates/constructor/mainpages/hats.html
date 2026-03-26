@@ -1,0 +1,658 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+{% with gradient_placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f1f5f9'/%3E%3Cstop offset='100%25' stop-color='%23ecfdf3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3C/svg%3E" %}
+<section class="grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-8">
+    <div class="space-y-4">
+        <h2 class="text-xl font-semibold">Конструктор шапок</h2>
+
+        <form class="options-form space-y-4 bg-white rounded-2xl shadow-sm border border-slate-100 p-5" onsubmit="return false;">
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Цвет</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for color in hat_colors %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="hat_color" value="{{ color }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ color }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                    <input id="hat-custom-color-radio" type="radio" name="hat_color" value="Пользовательский цвет" class="h-3 w-3 text-slate-900 border-slate-300">
+                    <span class="inline-flex items-center gap-2">
+                        <input id="hat-color-picker" type="color" value="#b6a38f" class="w-6 h-6">
+                        <span>Пользовательский цвет</span>
+                    </span>
+                </label>
+            </div>
+
+            <!-- <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Пряжа</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for yarn in yarn_types %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="yarn_type" value="{{ yarn }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ yarn }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div> -->
+
+            <!-- <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Модель</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for model in hat_models %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="hat_model" value="{{ model }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ model }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div> -->
+
+            <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Текстура</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-brand-200 transition" aria-label="Вязаная фактура">
+                        <input type="radio" name="hat_texture" value="knit" class="sr-only" checked>
+                        <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                            <img src="{% static '3dmodels/winter-hat/textures/Hat_Diffuse_2K.png' %}" alt="Вязаная текстура" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold">Вязаная фактура</div>
+                        </div>
+                    </label>
+
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-brand-200 transition" aria-label="Гладкая ткань">
+                        <input type="radio" name="hat_texture" value="flat" class="sr-only">
+                        <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                        <div>
+                            <div class="text-sm font-semibold">Гладкая ткань</div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 text-xs text-slate-600 flex gap-1">
+                <span class="font-medium text-slate-700">Текущий вариант:</span>
+                <span id="hat-choice-summary" class="italic text-slate-500">—</span>
+            </div>
+        </form>
+    </div>
+
+    <div class="space-y-4">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-semibold">3D-превью шапки</h3>
+                <span class="text-[11px] uppercase tracking-[0.18em] text-slate-400">прототип</span>
+            </div>
+            <div id="hat-preview" class="relative h-80 rounded-2xl border border-slate-200 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-brand-50 shadow-inner">
+                <div id="hat-preview-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-xs text-slate-500 bg-white/60 backdrop-blur-sm">
+                    <svg class="animate-spin h-5 w-5 text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                    </svg>
+                    <span>Загружаем модель…</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
+            <div class="mb-2">
+                <h3 class="text-sm font-semibold">Виртуальная примерка</h3>
+                <p class="text-xs text-slate-500 mt-1">Слева — оригинал фото, справа — результат с шапкой, подогнанной нейросетью.</p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 space-y-3">
+                {% if tryon_can_generate %}
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        <p>AI-примерка привязана к аккаунту. Каждая успешная генерация автоматически сохраняется в профиль.</p>
+                        <a href="{% url 'account' %}" class="text-xs font-semibold text-brand-700 hover:text-brand-800">Открыть мои работы</a>
+                    </div>
+                    <div class="app-actions sm:items-center sm:justify-between">
+                        <p id="hat-tryon-quota" class="text-xs font-semibold text-slate-700">Осталось {{ tryon_remaining }}: включено {{ tryon_monthly_remaining }} из {{ tryon_monthly_limit }} · доп. {{ tryon_extra_remaining }}</p>
+                        <a href="{{ tryon_purchase_url }}" class="text-xs font-semibold text-brand-700 hover:text-brand-800">Купить генерации</a>
+                    </div>
+                {% elif request.user.is_authenticated and tryon_is_master_user %}
+                    <p>{{ tryon_disabled_reason }}</p>
+                    <a href="{% url 'account' %}" class="app-btn app-btn-secondary text-xs sm:w-auto">Открыть статистику</a>
+                {% else %}
+                    <p>{{ tryon_disabled_reason }}</p>
+                    <div class="app-actions">
+                        <a href="{{ tryon_login_url }}" class="app-btn app-btn-primary text-xs sm:w-auto">Войти</a>
+                        <a href="{% url 'registration' %}?next={{ request.path|urlencode }}" class="app-btn app-btn-secondary text-xs sm:w-auto">Регистрация</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото пользователя</p>
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="hat-user-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Ваше фото">
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <p class="text-xs font-semibold text-slate-600">Фото с шапкой</p>
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="hat-ai-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Результат с шапкой">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <div class="app-actions sm:items-center sm:justify-between">
+                    <p class="text-xs text-slate-500">Постарайтесь, чтобы лицо было по центру кадра. Сервер сначала ставит изделие по геометрии лица, затем AI делает фотореалистичную интеграцию.</p>
+                    <label class="app-btn app-btn-primary cursor-pointer text-xs sm:w-auto">
+                        Загрузить фото
+                        <input type="file" id="hat-photo-input" accept="image/*" hidden>
+                    </label>
+                </div>
+                <div class="app-actions sm:items-center">
+                    <button id="hat-generate-btn" type="button" class="app-btn app-btn-accent text-xs sm:w-auto">
+                        {% if tryon_can_generate %}Сделать AI-примерку{% else %}Генерация недоступна{% endif %}
+                    </button>
+                    <a id="hat-download-link" class="hidden app-btn app-btn-secondary text-xs sm:w-auto" href="#" download="hat-tryon.png">
+                        Скачать результат
+                    </a>
+                    <span id="hat-tryon-status" class="status-pill bg-slate-100 text-slate-600">
+                        Загрузите фото, затем запустите примерку.
+                    </span>
+                </div>
+                <p id="hat-tryon-warning" class="text-xs text-slate-500"></p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endwith %}
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/server_tryon.js' %}"></script>
+<script>
+    const hatColorHexMap = {
+        "Чёрный": "#1f2937",
+        "Белый": "#f8fafc",
+        "Красный": "#ef4444",
+        "Бежевый": "#d6c3a1",
+    };
+
+    const CUSTOM_COLOR_VALUE = 'Пользовательский цвет';
+
+    const STORAGE_KEY = 'hatConstructorState';
+
+    function setCustomColorPickerVisible(isVisible) {
+        const colorPickerEl = document.getElementById('hat-color-picker');
+        if (!colorPickerEl) return;
+
+        colorPickerEl.style.display = isVisible ? 'inline-block' : 'none';
+        colorPickerEl.toggleAttribute('disabled', !isVisible);
+    }
+
+    function getStoredState() {
+        try {
+            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+        } catch (error) {
+            console.warn('Не удалось прочитать состояние конструктора шапок', error);
+            return {};
+        }
+    }
+
+    function persistState(updates = {}) {
+        const current = getStoredState();
+        const nextState = { ...current, ...updates };
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        } catch (error) {
+            console.warn('Не удалось сохранить состояние конструктора шапок', error);
+        }
+    }
+
+    function updateHatSummary() {
+        const color = document.querySelector('input[name="hat_color"]:checked')?.value;
+        const texture = document.querySelector('input[name="hat_texture"]:checked')?.value;
+        const colorHex = document.getElementById('hat-color-picker')?.value?.toUpperCase();
+        const summary = document.getElementById('hat-choice-summary');
+
+        const textureLabelMap = {
+            knit: 'Вязаная фактура',
+            flat: 'Гладкая ткань',
+        };
+
+        const parts = [];
+        if (color) parts.push(color);
+        if (colorHex) parts.push(colorHex);
+        if (texture && textureLabelMap[texture]) parts.push(textureLabelMap[texture]);
+
+        summary.textContent = parts.length ? parts.join(' · ') : '—';
+    }
+
+    function applyStoredState() {
+        const { selectedColorName, customColor, selectedTexture, userPhotoDataUrl } = getStoredState();
+
+        if (selectedColorName) {
+            const colorRadio = Array.from(document.querySelectorAll('input[name="hat_color"]'))
+                .find((el) => el.value === selectedColorName);
+            if (colorRadio) {
+                colorRadio.checked = true;
+                const colorPickerEl = document.getElementById('hat-color-picker');
+                if (colorPickerEl && hatColorHexMap[selectedColorName]) {
+                    colorPickerEl.value = hatColorHexMap[selectedColorName];
+                }
+            }
+        }
+
+        if (customColor) {
+            const colorPickerEl = document.getElementById('hat-color-picker');
+            if (colorPickerEl) {
+                colorPickerEl.value = customColor;
+                if (selectedColorName === CUSTOM_COLOR_VALUE) {
+                    const customRadio = document.getElementById('hat-custom-color-radio');
+                    if (customRadio) {
+                        customRadio.checked = true;
+                    }
+                }
+            }
+        }
+
+        if (selectedTexture) {
+            const textureRadio = Array.from(document.querySelectorAll('input[name="hat_texture"]'))
+                .find((el) => el.value === selectedTexture);
+            if (textureRadio) {
+                textureRadio.checked = true;
+            }
+        }
+
+        setCustomColorPickerVisible(selectedColorName === CUSTOM_COLOR_VALUE);
+
+        if (userPhotoDataUrl) {
+            const hatUserPhoto = document.getElementById('hat-user-photo');
+            if (hatUserPhoto) hatUserPhoto.src = userPhotoDataUrl;
+        }
+    }
+
+    function notifyPreviewOfColor(hex) {
+        document.dispatchEvent(new CustomEvent('hatColorUpdated', { detail: { color: hex } }));
+    }
+
+    function notifyPreviewOfTexture(texture) {
+        document.dispatchEvent(new CustomEvent('hatTextureUpdated', { detail: { texture } }));
+    }
+
+    const colorPicker = document.getElementById('hat-color-picker');
+    const customColorRadio = document.getElementById('hat-custom-color-radio');
+
+    document.querySelectorAll('input[name="hat_color"]').forEach((el) => {
+        el.addEventListener('change', () => {
+            const colorPickerEl = document.getElementById('hat-color-picker');
+            if (el.value === CUSTOM_COLOR_VALUE) {
+                if (colorPickerEl) {
+                    notifyPreviewOfColor(colorPickerEl.value);
+                }
+                setCustomColorPickerVisible(true);
+            } else if (colorPickerEl && hatColorHexMap[el.value]) {
+                colorPickerEl.value = hatColorHexMap[el.value];
+                notifyPreviewOfColor(colorPickerEl.value);
+                setCustomColorPickerVisible(false);
+            }
+            persistState({
+                selectedColorName: el.value,
+                customColor: document.getElementById('hat-color-picker')?.value,
+            });
+            updateHatSummary();
+        });
+    });
+
+    document.querySelectorAll('input[name="hat_texture"]').forEach((el) => {
+        el.addEventListener('change', () => {
+            notifyPreviewOfTexture(el.value);
+            persistState({ selectedTexture: el.value });
+            updateHatSummary();
+        });
+    });
+
+    document.querySelectorAll('.options-form input').forEach((el) => {
+        el.addEventListener('change', updateHatSummary);
+    });
+
+    const defaultColorRadio = document.querySelector('input[name="hat_color"]:checked');
+    if (colorPicker && defaultColorRadio && hatColorHexMap[defaultColorRadio.value]) {
+        colorPicker.value = hatColorHexMap[defaultColorRadio.value];
+    }
+
+    setCustomColorPickerVisible(defaultColorRadio?.value === CUSTOM_COLOR_VALUE);
+
+    if (colorPicker) {
+        colorPicker.addEventListener('input', (event) => {
+            if (customColorRadio) {
+                customColorRadio.checked = true;
+            }
+            notifyPreviewOfColor(event.target.value);
+            persistState({
+                customColor: event.target.value,
+                selectedColorName: document.querySelector('input[name="hat_color"]:checked')?.value ?? CUSTOM_COLOR_VALUE,
+            });
+            updateHatSummary();
+        });
+    }
+
+    const hatPhotoInput = document.getElementById('hat-photo-input');
+    const hatUserPhoto = document.getElementById('hat-user-photo');
+    
+    if (hatPhotoInput) {
+        hatPhotoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            hatUserPhoto.src = url;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                persistState({ userPhotoDataUrl: reader.result });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    applyStoredState();
+    notifyPreviewOfColor(document.getElementById('hat-color-picker')?.value ?? '#b6a38f');
+    const initialTexture = document.querySelector('input[name="hat_texture"]:checked')?.value;
+    if (initialTexture) {
+        notifyPreviewOfTexture(initialTexture);
+    }
+    updateHatSummary();
+</script>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
+            "three/examples/jsm/controls/OrbitControls.js": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/controls/OrbitControls.js",
+            "three/examples/jsm/loaders/OBJLoader.js": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/loaders/OBJLoader.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+    import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+
+    const previewContainer = document.getElementById('hat-preview');
+    const loaderOverlay = document.getElementById('hat-preview-loader');
+    if (!previewContainer) {
+        console.warn('Hat preview container not found; skipping 3D setup.');
+    } else {
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(previewContainer.clientWidth, previewContainer.clientHeight);
+    renderer.domElement.classList.add('absolute', 'inset-0');
+    previewContainer.appendChild(renderer.domElement);
+
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8fafc);
+
+    const camera = new THREE.PerspectiveCamera(
+        34,
+        previewContainer.clientWidth / previewContainer.clientHeight,
+        0.01,
+        100,
+    );
+    camera.position.set(0.28, 0.22, 0.58);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.target.set(0, 0.1, 0);
+    controls.minDistance = 0.28;
+    controls.maxDistance = 0.95;
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambientLight);
+
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x9fb3c8, 0.9);
+    scene.add(hemiLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(2.5, 2.5, 2.5);
+    scene.add(directionalLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    fillLight.position.set(-2, 1.5, -1.5);
+    scene.add(fillLight);
+
+    const textureLoader = new THREE.TextureLoader();
+    const texturePresets = {
+        knit: {
+            map: '{% static "3dmodels/winter-hat/textures/Hat_Diffuse_2K.png" %}',
+            normalMap: '{% static "3dmodels/winter-hat/textures/Hat_Normal_2K.png" %}',
+            aoMap: '{% static "3dmodels/winter-hat/textures/Hat_AO_2K.png" %}',
+            roughnessMap: '{% static "3dmodels/winter-hat/textures/Hat_Roughness_2K.png" %}',
+            roughness: 0.82,
+            metalness: 0.08,
+        },
+        flat: {
+            map: null,
+            normalMap: null,
+            aoMap: null,
+            roughnessMap: null,
+            roughness: 0.6,
+            metalness: 0.04,
+        },
+    };
+
+    const loadedTextures = {};
+
+    async function resolveTextureSet(key) {
+        if (loadedTextures[key]) return loadedTextures[key];
+
+        const preset = texturePresets[key];
+        if (!preset) return texturePresets.knit;
+
+        if (!preset.map) {
+            loadedTextures[key] = preset;
+            return preset;
+        }
+
+        const [map, normalMap, aoMap, roughnessMap] = await Promise.all([
+            textureLoader.loadAsync(preset.map),
+            textureLoader.loadAsync(preset.normalMap),
+            textureLoader.loadAsync(preset.aoMap),
+            textureLoader.loadAsync(preset.roughnessMap),
+        ]);
+
+        map.colorSpace = THREE.SRGBColorSpace;
+        loadedTextures[key] = {
+            ...preset,
+            map,
+            normalMap,
+            aoMap,
+            roughnessMap,
+        };
+
+        return loadedTextures[key];
+    }
+
+    const material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#b6a38f'),
+        metalness: 0.08,
+        roughness: 0.82,
+        side: THREE.DoubleSide,
+        aoMapIntensity: 0.65,
+    });
+
+    function fitCameraToObject(object) {
+        const box = new THREE.Box3().setFromObject(object);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const fov = THREE.MathUtils.degToRad(camera.fov);
+        let distance = (maxDim / 2) / Math.tan(fov / 2);
+        distance *= 1.18;
+
+        controls.target.copy(center);
+        camera.position.set(
+            center.x + distance * 0.16,
+            center.y + distance * 0.08,
+            center.z + distance * 0.78,
+        );
+        camera.near = Math.max(distance / 100, 0.01);
+        camera.far = Math.max(distance * 15, 10);
+        camera.updateProjectionMatrix();
+        controls.minDistance = distance * 0.58;
+        controls.maxDistance = distance * 1.65;
+        controls.update();
+    }
+
+    let hatRoot = null;
+    const objLoader = new OBJLoader();
+    const modelUrl = '{% static "3dmodels/winter-hat/source/Hat/Hat_Final_LoPoly.OBJ" %}';
+
+    objLoader.load(
+        modelUrl,
+        (obj) => {
+            hatRoot = obj;
+            obj.traverse((child) => {
+                if (child.isMesh) {
+                    child.geometry.computeVertexNormals();
+                    if (child.geometry.attributes.uv && !child.geometry.attributes.uv2) {
+                        child.geometry.setAttribute('uv2', child.geometry.attributes.uv);
+                    }
+                    child.material = material;
+                }
+            });
+            obj.scale.setScalar(0.52);
+            obj.position.set(0, -0.08, 0);
+            obj.rotation.y = Math.PI * 0.24;
+            scene.add(obj);
+            fitCameraToObject(obj);
+            if (loaderOverlay) loaderOverlay.classList.add('hidden');
+        },
+        undefined,
+        (error) => {
+            console.error('Не удалось загрузить модель шапки', error);
+            if (loaderOverlay) {
+                loaderOverlay.innerHTML = '<span class="text-red-500">Не удалось загрузить модель</span>';
+            }
+        },
+    );
+
+    const state = {
+        color: document.getElementById('hat-color-picker')?.value ?? '#b6a38f',
+        texture: document.querySelector('input[name="hat_texture"]:checked')?.value ?? 'knit',
+    };
+
+    async function refreshMaterial() {
+        const textureSet = await resolveTextureSet(state.texture);
+        material.color.set(state.color ?? '#b6a38f');
+        material.emissive.set(state.color ?? '#b6a38f').multiplyScalar(0.1);
+        material.emissiveIntensity = 0.8;
+        material.map = textureSet.map ?? null;
+        material.normalMap = textureSet.normalMap ?? null;
+        material.aoMap = textureSet.aoMap ?? null;
+        material.roughnessMap = textureSet.roughnessMap ?? null;
+        material.roughness = textureSet.roughness ?? 0.8;
+        material.metalness = textureSet.metalness ?? 0.05;
+        material.aoMapIntensity = textureSet.aoMap ? 0.65 : 0.4;
+        material.needsUpdate = true;
+    }
+
+    document.addEventListener('hatColorUpdated', (event) => {
+        state.color = event.detail?.color ?? state.color;
+        refreshMaterial();
+    });
+
+    document.addEventListener('hatTextureUpdated', (event) => {
+        state.texture = event.detail?.texture ?? state.texture;
+        refreshMaterial();
+    });
+
+    refreshMaterial();
+
+    window.hatPreviewController = {
+        async getReferenceImage() {
+            const previousBackground = scene.background;
+            scene.background = null;
+            renderer.render(scene, camera);
+            const dataUrl = renderer.domElement.toDataURL('image/png');
+            scene.background = previousBackground;
+            renderer.render(scene, camera);
+            return dataUrl;
+        },
+    };
+
+    window.addEventListener('resize', () => {
+        const { clientWidth, clientHeight } = previewContainer;
+        renderer.setSize(clientWidth, clientHeight);
+        camera.aspect = clientWidth / clientHeight;
+        camera.updateProjectionMatrix();
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
+    }
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const hatTryOn = window.RucodelTryOn?.create({
+            category: 'hat',
+            photoInputId: 'hat-photo-input',
+            userPhotoId: 'hat-user-photo',
+            aiPhotoId: 'hat-ai-photo',
+            statusId: 'hat-tryon-status',
+            buttonId: 'hat-generate-btn',
+            downloadLinkId: 'hat-download-link',
+            warningId: 'hat-tryon-warning',
+            quotaId: 'hat-tryon-quota',
+            isAuthenticated: {{ request.user.is_authenticated|yesno:'true,false' }},
+            canGenerate: {{ tryon_can_generate|yesno:'true,false' }},
+            disabledReason: '{{ tryon_disabled_reason|escapejs }}',
+            remainingGenerations: {{ tryon_remaining }},
+            monthlyLimit: {{ tryon_monthly_limit }},
+            monthlyRemaining: {{ tryon_monthly_remaining }},
+            extraRemaining: {{ tryon_extra_remaining }},
+            loginUrl: '{{ tryon_login_url }}',
+            initialUserImage: (() => {
+                try {
+                    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}').userPhotoDataUrl || null;
+                } catch (error) {
+                    return null;
+                }
+            })(),
+            async getAccessoryImage() {
+                if (window.hatPreviewController?.getReferenceImage) {
+                    return await window.hatPreviewController.getReferenceImage();
+                }
+                throw new Error('3D-превью шапки ещё не готово.');
+            },
+            getSummary() {
+                return document.getElementById('hat-choice-summary')?.textContent?.trim() || '';
+            },
+            getSelections() {
+                return {
+                    color_name: document.querySelector('input[name="hat_color"]:checked')?.value || '',
+                    color_hex: document.getElementById('hat-color-picker')?.value || '',
+                    texture: document.querySelector('input[name="hat_texture"]:checked')?.value || '',
+                };
+            },
+            onUserImageChange(dataUrl) {
+                persistState({ userPhotoDataUrl: dataUrl });
+            },
+        });
+
+        if (hatTryOn?.getUserImage()) {
+            document.getElementById('hat-user-photo').src = hatTryOn.getUserImage();
+        }
+    });
+</script>
+{% endblock %}
