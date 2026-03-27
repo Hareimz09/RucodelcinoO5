@@ -101,10 +101,6 @@
         });
     }
 
-    function isImageFile(file) {
-        return Boolean(file && typeof file.type === 'string' && file.type.startsWith('image/'));
-    }
-
     window.RucodelTryOn = {
         create(config) {
             const photoInput = document.getElementById(config.photoInputId);
@@ -115,10 +111,8 @@
             const downloadEl = document.getElementById(config.downloadLinkId);
             const warningEl = document.getElementById(config.warningId);
             const quotaEl = config.quotaId ? document.getElementById(config.quotaId) : null;
-            const dropzoneEl = config.dropzoneId ? document.getElementById(config.dropzoneId) : null;
-            const replaceTriggerEl = config.replaceTriggerId ? document.getElementById(config.replaceTriggerId) : null;
-            const userFrame = config.userFrameId ? document.getElementById(config.userFrameId) : (userPhoto?.closest('[data-tryon-frame]') || null);
-            const aiFrame = config.aiFrameId ? document.getElementById(config.aiFrameId) : (aiPhoto?.closest('[data-tryon-frame]') || null);
+            const userFrame = userPhoto?.closest('[data-tryon-frame]') || null;
+            const aiFrame = aiPhoto?.closest('[data-tryon-frame]') || null;
             const initialResultPlaceholder = config.initialResultPlaceholder || aiPhoto?.getAttribute('src') || '';
 
             let userImageDataUrl = config.initialUserImage || null;
@@ -144,13 +138,6 @@
                 buttonEl.classList.toggle('cursor-not-allowed', shouldDisable);
             }
 
-            function updateImageState() {
-                const hasImage = Boolean(userImageDataUrl);
-                if (userFrame) {
-                    userFrame.dataset.hasImage = hasImage ? 'true' : 'false';
-                }
-            }
-
             function resetResultPreview() {
                 if (aiPhoto) {
                     aiPhoto.src = initialResultPlaceholder;
@@ -174,7 +161,6 @@
             function applyUserImage(dataUrl) {
                 userImageDataUrl = dataUrl;
                 if (userPhoto) userPhoto.src = dataUrl;
-                updateImageState();
                 syncPreviewFrames(dataUrl);
                 resetResultPreview();
                 if (typeof config.onUserImageChange === 'function') {
@@ -182,74 +168,9 @@
                 }
             }
 
-            async function handleSelectedFile(file) {
-                if (!file) return;
-                if (!isImageFile(file)) {
-                    setStatus(statusEl, 'Нужен файл изображения: JPG, PNG, WEBP и т.д.', 'error');
-                    return;
-                }
-                try {
-                    const dataUrl = await fileToDataUrl(file);
-                    applyUserImage(dataUrl);
-                    if (warningEl) warningEl.textContent = '';
-                    if (canGenerate && Number(quota.total_remaining || 0) > 0) {
-                        setStatus(statusEl, 'Фото загружено. Можно запускать AI-примерку.', 'idle');
-                    }
-                } catch (error) {
-                    setStatus(statusEl, error.message || 'Не удалось загрузить фото.', 'error');
-                }
-            }
-
-            function openFilePicker() {
-                if (photoInput) {
-                    photoInput.click();
-                }
-            }
-
-            function bindDropzone() {
-                const activeTarget = userFrame || dropzoneEl;
-                if (!activeTarget) return;
-
-                const setDragState = (active) => {
-                    if (dropzoneEl) {
-                        dropzoneEl.classList.toggle('dragover', Boolean(active));
-                    }
-                };
-
-                activeTarget.addEventListener('dragenter', (event) => {
-                    event.preventDefault();
-                    setDragState(true);
-                });
-                activeTarget.addEventListener('dragover', (event) => {
-                    event.preventDefault();
-                    setDragState(true);
-                });
-                activeTarget.addEventListener('dragleave', (event) => {
-                    if (!activeTarget.contains(event.relatedTarget)) {
-                        setDragState(false);
-                    }
-                });
-                activeTarget.addEventListener('drop', (event) => {
-                    event.preventDefault();
-                    setDragState(false);
-                    const file = event.dataTransfer?.files?.[0];
-                    handleSelectedFile(file);
-                });
-
-                if (replaceTriggerEl) {
-                    replaceTriggerEl.addEventListener('click', (event) => {
-                        if (event.target === replaceTriggerEl) {
-                            event.preventDefault();
-                            openFilePicker();
-                        }
-                    });
-                }
-            }
-
             if (userImageDataUrl) {
                 applyUserImage(userImageDataUrl);
             } else {
-                updateImageState();
                 resetResultPreview();
             }
 
@@ -266,13 +187,21 @@
             }
 
             syncQuotaUi();
-            bindDropzone();
 
             if (photoInput) {
                 photoInput.addEventListener('change', async (event) => {
                     const file = event.target.files && event.target.files[0];
-                    await handleSelectedFile(file);
-                    photoInput.value = '';
+                    if (!file) return;
+                    try {
+                        const dataUrl = await fileToDataUrl(file);
+                        applyUserImage(dataUrl);
+                        if (warningEl) warningEl.textContent = '';
+                        if (canGenerate && Number(quota.total_remaining || 0) > 0) {
+                            setStatus(statusEl, 'Фото загружено. Можно запускать AI-примерку.', 'idle');
+                        }
+                    } catch (error) {
+                        setStatus(statusEl, error.message || 'Не удалось загрузить фото.', 'error');
+                    }
                 });
             }
 
@@ -376,7 +305,6 @@
                 },
                 resetResultPreview,
                 generate,
-                openFilePicker,
             };
         },
     };

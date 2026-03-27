@@ -1,115 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block extra_head %}
-<style>
-    .hat-model-card,
-    .hat-option-card {
-        transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease, transform .2s ease;
-    }
-
-    .hat-model-card:hover,
-    .hat-option-card:hover {
-        transform: translateY(-1px);
-    }
-
-    .hat-model-card input:checked + .hat-model-card-body,
-    .hat-option-card input:checked + .hat-option-card-body {
-        border-color: rgba(34, 197, 94, 0.48);
-        background: rgba(240, 253, 244, 0.88);
-        box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.14);
-    }
-
-    .hat-dropzone.dragover {
-        border-color: rgba(34, 197, 94, 0.72);
-        background: rgba(240, 253, 244, 0.94);
-        box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
-    }
-
-    [data-tryon-frame][data-has-image="true"] .frame-empty-state {
-        opacity: 0;
-        pointer-events: none;
-    }
-
-    [data-tryon-frame][data-has-image="true"] .frame-replace-chip {
-        opacity: 1;
-        transform: translateY(0);
-        pointer-events: auto;
-    }
-
-    .frame-replace-chip {
-        opacity: 0;
-        transform: translateY(6px);
-        pointer-events: none;
-        transition: opacity .2s ease, transform .2s ease;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-{% with transparent_placeholder="data:image/gif;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA=" %}
-<section class="grid grid-cols-1 lg:grid-cols-[340px,1fr] gap-8">
+{% with gradient_placeholder="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 800'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23f1f5f9'/%3E%3Cstop offset='100%25' stop-color='%23ecfdf3'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='1200' height='800' fill='url(%23g)'/%3E%3C/svg%3E" %}
+<section class="grid grid-cols-1 lg:grid-cols-[320px,1fr] gap-8">
     <div class="space-y-4">
         <h2 class="text-xl font-semibold">Конструктор шапок</h2>
 
-        <form class="options-form space-y-5 bg-white rounded-2xl shadow-sm border border-slate-100 p-5" onsubmit="return false;">
-            <div class="space-y-3">
-                <div>
-                    <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Модель</h3>
-                    <p class="text-xs text-slate-500 mt-1">Добавили ещё 3 популярных зимних силуэта и оставили возможность вручную докрутить детали.</p>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label class="hat-model-card cursor-pointer">
-                        <input type="radio" name="hat_model" value="classic" class="sr-only" checked>
-                        <div class="hat-model-card-body h-full rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-                            <div class="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-                                <img src="{% static 'img/hats/model-classic.svg' %}" alt="Классическая бини" class="h-28 w-full object-cover">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Классическая бини</div>
-                                <div class="text-xs text-slate-500 mt-1">Базовая посадка без лишнего объёма.</div>
-                            </div>
-                        </div>
-                    </label>
-                    <label class="hat-model-card cursor-pointer">
-                        <input type="radio" name="hat_model" value="cuffed" class="sr-only">
-                        <div class="hat-model-card-body h-full rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-                            <div class="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-                                <img src="{% static 'img/hats/model-cuffed.svg' %}" alt="Бини с отворотом" class="h-28 w-full object-cover">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Бини с отворотом</div>
-                                <div class="text-xs text-slate-500 mt-1">Более тёплый край и собранный силуэт.</div>
-                            </div>
-                        </div>
-                    </label>
-                    <label class="hat-model-card cursor-pointer">
-                        <input type="radio" name="hat_model" value="slouchy" class="sr-only">
-                        <div class="hat-model-card-body h-full rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-                            <div class="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-                                <img src="{% static 'img/hats/model-slouch.svg' %}" alt="Удлинённая slouchy-шапка" class="h-28 w-full object-cover">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Slouchy</div>
-                                <div class="text-xs text-slate-500 mt-1">Расслабленная вытянутая форма.</div>
-                            </div>
-                        </div>
-                    </label>
-                    <label class="hat-model-card cursor-pointer">
-                        <input type="radio" name="hat_model" value="pompom" class="sr-only">
-                        <div class="hat-model-card-body h-full rounded-2xl border border-slate-200 bg-white p-3 space-y-3">
-                            <div class="rounded-xl overflow-hidden border border-slate-100 bg-slate-50">
-                                <img src="{% static 'img/hats/model-pompom.svg' %}" alt="Бини с помпоном" class="h-28 w-full object-cover">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Бини с помпоном</div>
-                                <div class="text-xs text-slate-500 mt-1">Более мягкий и заметный зимний акцент.</div>
-                            </div>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
+        <form class="options-form space-y-4 bg-white rounded-2xl shadow-sm border border-slate-100 p-5" onsubmit="return false;">
             <div class="space-y-2">
                 <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Цвет</h3>
                 <div class="flex flex-wrap gap-2">
@@ -124,108 +22,60 @@
                 <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
                     <input id="hat-custom-color-radio" type="radio" name="hat_color" value="Пользовательский цвет" class="h-3 w-3 text-slate-900 border-slate-300">
                     <span class="inline-flex items-center gap-2">
-                        <input id="hat-color-picker" type="color" value="#1f2937" class="w-6 h-6">
+                        <input id="hat-color-picker" type="color" value="#b6a38f" class="w-6 h-6">
                         <span>Пользовательский цвет</span>
                     </span>
                 </label>
             </div>
 
-            <div class="space-y-2">
-                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Материал</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <!-- <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Пряжа</h3>
+                <div class="flex flex-wrap gap-2">
                     {% for yarn in yarn_types %}
-                        <label class="hat-option-card cursor-pointer">
-                            <input type="radio" name="yarn_type" value="{{ yarn }}" {% if forloop.first %}checked{% endif %} class="sr-only">
-                            <div class="hat-option-card-body rounded-2xl border border-slate-200 bg-white p-3 space-y-1">
-                                <div class="text-sm font-semibold text-slate-900">{{ yarn }}</div>
-                                <div class="text-xs text-slate-500">
-                                    {% if yarn == 'Меринос' %}Универсальная плотная шерсть.{% elif yarn == 'Мохер' %}Более пушистая фактура.{% elif yarn == 'Кашемир' %}Мягкая деликатная поверхность.{% else %}Объёмная зернистая вязка.{% endif %}
-                                </div>
-                            </div>
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="yarn_type" value="{{ yarn }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ yarn }}</span>
                         </label>
                     {% endfor %}
                 </div>
-            </div>
+            </div> -->
+
+            <!-- <div class="space-y-2">
+                <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Модель</h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for model in hat_models %}
+                        <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-xs cursor-pointer hover:border-slate-400">
+                            <input type="radio" name="hat_model" value="{{ model }}" {% if forloop.first %}checked{% endif %} class="h-3 w-3 text-slate-900 border-slate-300">
+                            <span>{{ model }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div> -->
 
             <div class="space-y-2">
                 <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Текстура</h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <label class="hat-option-card cursor-pointer">
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-brand-200 transition" aria-label="Вязаная фактура">
                         <input type="radio" name="hat_texture" value="knit" class="sr-only" checked>
-                        <div class="hat-option-card-body rounded-2xl border border-slate-200 bg-white p-3 flex items-center gap-3">
-                            <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
-                                <img src="{% static '3dmodels/winter-hat/textures/Hat_Diffuse_2K.png' %}" alt="Вязаная текстура" class="w-full h-full object-cover">
-                            </div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Рельефная вязка</div>
-                                <div class="text-xs text-slate-500 mt-1">Более выраженный зимний рисунок.</div>
-                            </div>
+                        <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-slate-50">
+                            <img src="{% static '3dmodels/winter-hat/textures/Hat_Diffuse_2K.png' %}" alt="Вязаная текстура" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <div class="text-sm font-semibold">Вязаная фактура</div>
                         </div>
                     </label>
-                    <label class="hat-option-card cursor-pointer">
+
+                    <label class="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white cursor-pointer hover:border-brand-200 transition" aria-label="Гладкая ткань">
                         <input type="radio" name="hat_texture" value="flat" class="sr-only">
-                        <div class="hat-option-card-body rounded-2xl border border-slate-200 bg-white p-3 flex items-center gap-3">
-                            <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200"></div>
-                            <div>
-                                <div class="text-sm font-semibold text-slate-900">Гладкая ткань</div>
-                                <div class="text-xs text-slate-500 mt-1">Более чистый и спокойный вид.</div>
-                            </div>
+                        <div class="h-12 w-12 rounded-lg overflow-hidden border border-slate-200 bg-gradient-to-br from-slate-100 to-slate-200"></div>
+                        <div>
+                            <div class="text-sm font-semibold">Гладкая ткань</div>
                         </div>
                     </label>
                 </div>
             </div>
 
-            <div class="grid gap-4 sm:grid-cols-3">
-                <div class="space-y-2">
-                    <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Посадка</h3>
-                    <div class="space-y-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_fit" value="standard" checked class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Стандартная</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_fit" value="extended" class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Удлинённая</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Отворот</h3>
-                    <div class="space-y-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_cuff" value="none" class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Без отворота</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_cuff" value="medium" checked class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Средний</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_cuff" value="high" class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Высокий</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <h3 class="text-xs font-semibold tracking-[0.16em] uppercase text-slate-500">Верх</h3>
-                    <div class="space-y-2">
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_topper" value="none" checked class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Чистый верх</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_topper" value="small" class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Мини-помпон</span>
-                        </label>
-                        <label class="inline-flex items-center gap-2 text-sm text-slate-700">
-                            <input type="radio" name="hat_topper" value="large" class="h-4 w-4 text-brand-600 border-slate-300">
-                            <span>Крупный помпон</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pt-2 border-t border-slate-100 text-xs text-slate-600 flex gap-1 flex-wrap">
+            <div class="pt-2 border-t border-slate-100 text-xs text-slate-600 flex gap-1">
                 <span class="font-medium text-slate-700">Текущий вариант:</span>
                 <span id="hat-choice-summary" class="italic text-slate-500">—</span>
             </div>
@@ -239,7 +89,7 @@
                 <span class="text-[11px] uppercase tracking-[0.18em] text-slate-400">прототип</span>
             </div>
             <div id="hat-preview" class="relative h-80 rounded-2xl border border-slate-200 overflow-hidden bg-gradient-to-br from-slate-50 via-white to-brand-50 shadow-inner">
-                <div id="hat-preview-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-xs text-slate-500 bg-white/60 backdrop-blur-sm z-10">
+                <div id="hat-preview-loader" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-xs text-slate-500 bg-white/60 backdrop-blur-sm">
                     <svg class="animate-spin h-5 w-5 text-brand-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
@@ -252,7 +102,7 @@
         <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 space-y-4">
             <div class="mb-2">
                 <h3 class="text-sm font-semibold">Виртуальная примерка</h3>
-                <p class="text-xs text-slate-500 mt-1">Слева — исходное фото с drag & drop загрузкой, справа — результат после примерки.</p>
+                <p class="text-xs text-slate-500 mt-1">Слева — оригинал фото, справа — результат с шапкой, подогнанной нейросетью.</p>
             </div>
 
             <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600 space-y-3">
@@ -279,43 +129,26 @@
 
             <div class="grid gap-4 lg:grid-cols-2">
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between gap-3">
-                        <p class="text-xs font-semibold text-slate-600">Фото пользователя</p>
-                        <p class="text-[11px] text-slate-400">Поддерживается drag & drop</p>
-                    </div>
-                    <div id="hat-user-frame" data-tryon-frame data-has-image="false" class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
-                        <div class="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-slate-50"></div>
-                        <img id="hat-user-photo" class="relative z-[1] w-full h-full object-contain" src="{{ transparent_placeholder }}" alt="Ваше фото">
-                        <label id="hat-upload-dropzone" for="hat-photo-input" class="hat-dropzone frame-empty-state absolute inset-4 z-[2] flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-300 bg-white/78 px-6 text-center cursor-pointer backdrop-blur-sm">
-                            <div class="h-12 w-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M12 11v8m0-8l-3 3m3-3l3 3" />
-                                </svg>
-                            </div>
-                            <div>
-                                <p class="text-sm font-semibold text-slate-900">Перетащите фото сюда</p>
-                                <p class="text-xs text-slate-500 mt-1">или нажмите, чтобы выбрать файл с телефона или компьютера</p>
-                            </div>
-                        </label>
-                        <label id="hat-upload-replace" for="hat-photo-input" class="frame-replace-chip absolute left-3 bottom-3 z-[3] inline-flex items-center gap-2 rounded-full bg-white/92 px-3 py-1.5 text-xs font-medium text-slate-700 shadow-sm border border-slate-200 cursor-pointer">
-                            Заменить фото
-                        </label>
-                        <input type="file" id="hat-photo-input" accept="image/*" hidden>
+                    <p class="text-xs font-semibold text-slate-600">Фото пользователя</p>
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="hat-user-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Ваше фото">
                     </div>
                 </div>
                 <div class="space-y-2">
                     <p class="text-xs font-semibold text-slate-600">Фото с шапкой</p>
-                    <div id="hat-ai-frame" data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
-                        <div class="absolute inset-0 bg-gradient-to-br from-slate-100 via-white to-brand-50"></div>
-                        <div class="absolute inset-0" style="background: radial-gradient(circle at top right, rgba(34,197,94,0.16), transparent 30%), radial-gradient(circle at bottom left, rgba(59,130,246,0.12), transparent 30%);"></div>
-                        <img id="hat-ai-photo" class="relative z-[1] w-full h-full object-contain" src="{{ transparent_placeholder }}" alt="Результат с шапкой">
+                    <div data-tryon-frame class="relative w-full overflow-hidden rounded-2xl bg-slate-100 border border-slate-200" style="--preview-ratio: 3/4;">
+                        <img id="hat-ai-photo" class="w-full h-full object-contain" src="{{ gradient_placeholder }}" alt="Результат с шапкой">
                     </div>
                 </div>
             </div>
 
             <div class="flex flex-col gap-3">
                 <div class="app-actions sm:items-center sm:justify-between">
-                    <p class="text-xs text-slate-500">Лицо лучше держать по центру кадра. Новую фотографию можно в любой момент снова перетащить прямо в левое окно.</p>
+                    <p class="text-xs text-slate-500">Постарайтесь, чтобы лицо было по центру кадра. Сервер сначала ставит изделие по геометрии лица, затем AI делает фотореалистичную интеграцию.</p>
+                    <label class="app-btn app-btn-primary cursor-pointer text-xs sm:w-auto">
+                        Загрузить фото
+                        <input type="file" id="hat-photo-input" accept="image/*" hidden>
+                    </label>
                 </div>
                 <div class="app-actions sm:items-center">
                     <button id="hat-generate-btn" type="button" class="app-btn app-btn-accent text-xs sm:w-auto">
@@ -344,24 +177,16 @@
         "Белый": "#f8fafc",
         "Красный": "#ef4444",
         "Бежевый": "#d6c3a1",
-        "Пудровый": "#f2c6d2",
-        "Шоколадный": "#7c4a32",
-        "Изумрудный": "#0f766e",
-        "Голубой": "#7dd3fc",
     };
 
     const CUSTOM_COLOR_VALUE = 'Пользовательский цвет';
+
     const STORAGE_KEY = 'hatConstructorState';
-    const hatModelPresets = {
-        classic: { fit: 'standard', cuff: 'medium', topper: 'none', yarn: 'Меринос' },
-        cuffed: { fit: 'standard', cuff: 'high', topper: 'none', yarn: 'Меринос' },
-        slouchy: { fit: 'extended', cuff: 'none', topper: 'none', yarn: 'Кашемир' },
-        pompom: { fit: 'standard', cuff: 'medium', topper: 'large', yarn: 'Букле' },
-    };
 
     function setCustomColorPickerVisible(isVisible) {
         const colorPickerEl = document.getElementById('hat-color-picker');
         if (!colorPickerEl) return;
+
         colorPickerEl.style.display = isVisible ? 'inline-block' : 'none';
         colorPickerEl.toggleAttribute('disabled', !isVisible);
     }
@@ -385,177 +210,91 @@
         }
     }
 
-    function getSelectedValue(name) {
-        return document.querySelector(`input[name="${name}"]:checked`)?.value || '';
-    }
-
     function updateHatSummary() {
-        const modelLabels = {
-            classic: 'Классическая бини',
-            cuffed: 'Бини с отворотом',
-            slouchy: 'Slouchy',
-            pompom: 'Бини с помпоном',
-        };
-        const fitLabels = {
-            standard: 'стандартная посадка',
-            extended: 'удлинённая посадка',
-        };
-        const cuffLabels = {
-            none: 'без отворота',
-            medium: 'средний отворот',
-            high: 'высокий отворот',
-        };
-        const topperLabels = {
-            none: 'чистый верх',
-            small: 'мини-помпон',
-            large: 'крупный помпон',
-        };
-        const textureLabels = {
-            knit: 'рельефная вязка',
-            flat: 'гладкая ткань',
+        const color = document.querySelector('input[name="hat_color"]:checked')?.value;
+        const texture = document.querySelector('input[name="hat_texture"]:checked')?.value;
+        const colorHex = document.getElementById('hat-color-picker')?.value?.toUpperCase();
+        const summary = document.getElementById('hat-choice-summary');
+
+        const textureLabelMap = {
+            knit: 'Вязаная фактура',
+            flat: 'Гладкая ткань',
         };
 
-        const model = getSelectedValue('hat_model');
-        const color = getSelectedValue('hat_color');
-        const yarn = getSelectedValue('yarn_type');
-        const texture = getSelectedValue('hat_texture');
-        const fit = getSelectedValue('hat_fit');
-        const cuff = getSelectedValue('hat_cuff');
-        const topper = getSelectedValue('hat_topper');
+        const parts = [];
+        if (color) parts.push(color);
+        if (colorHex) parts.push(colorHex);
+        if (texture && textureLabelMap[texture]) parts.push(textureLabelMap[texture]);
 
-        const parts = [
-            modelLabels[model] || model,
-            color === CUSTOM_COLOR_VALUE ? `собственный цвет ${document.getElementById('hat-color-picker')?.value || ''}` : color,
-            yarn,
-            textureLabels[texture] || texture,
-            fitLabels[fit] || fit,
-            cuffLabels[cuff] || cuff,
-            topperLabels[topper] || topper,
-        ].filter(Boolean);
-
-        const summaryEl = document.getElementById('hat-choice-summary');
-        if (summaryEl) {
-            summaryEl.textContent = parts.join(' · ');
-        }
-    }
-
-    function notifyPreview(type, value) {
-        document.dispatchEvent(new CustomEvent(type, { detail: value }));
-    }
-
-    function applyModelPreset(modelValue) {
-        const preset = hatModelPresets[modelValue];
-        if (!preset) return;
-
-        if (preset.yarn) {
-            const yarnInput = document.querySelector(`input[name="yarn_type"][value="${preset.yarn}"]`);
-            if (yarnInput) yarnInput.checked = true;
-        }
-        if (preset.fit) {
-            const fitInput = document.querySelector(`input[name="hat_fit"][value="${preset.fit}"]`);
-            if (fitInput) fitInput.checked = true;
-        }
-        if (preset.cuff) {
-            const cuffInput = document.querySelector(`input[name="hat_cuff"][value="${preset.cuff}"]`);
-            if (cuffInput) cuffInput.checked = true;
-        }
-        if (preset.topper) {
-            const topperInput = document.querySelector(`input[name="hat_topper"][value="${preset.topper}"]`);
-            if (topperInput) topperInput.checked = true;
-        }
-
-        notifyPreview('hatStyleUpdated', {
-            style: modelValue,
-            fit: getSelectedValue('hat_fit'),
-            cuff: getSelectedValue('hat_cuff'),
-            topper: getSelectedValue('hat_topper'),
-            yarn: getSelectedValue('yarn_type'),
-        });
-    }
-
-    function syncPreviewState() {
-        const colorValue = getSelectedValue('hat_color');
-        const colorHex = colorValue === CUSTOM_COLOR_VALUE
-            ? (document.getElementById('hat-color-picker')?.value || '#1f2937')
-            : (hatColorHexMap[colorValue] || '#1f2937');
-
-        notifyPreview('hatColorUpdated', { color: colorHex });
-        notifyPreview('hatTextureUpdated', { texture: getSelectedValue('hat_texture') });
-        notifyPreview('hatStyleUpdated', {
-            style: getSelectedValue('hat_model'),
-            fit: getSelectedValue('hat_fit'),
-            cuff: getSelectedValue('hat_cuff'),
-            topper: getSelectedValue('hat_topper'),
-            yarn: getSelectedValue('yarn_type'),
-        });
+        summary.textContent = parts.length ? parts.join(' · ') : '—';
     }
 
     function applyStoredState() {
-        const state = getStoredState();
-        const selectedColorName = state.selectedColorName || 'Чёрный';
-        const customColor = state.customColor || '#1f2937';
-        const selectedTexture = state.selectedTexture || 'knit';
-        const selectedModel = state.selectedModel || 'classic';
-        const selectedYarn = state.selectedYarn || hatModelPresets[selectedModel]?.yarn || 'Меринос';
-        const selectedFit = state.selectedFit || hatModelPresets[selectedModel]?.fit || 'standard';
-        const selectedCuff = state.selectedCuff || hatModelPresets[selectedModel]?.cuff || 'medium';
-        const selectedTopper = state.selectedTopper || hatModelPresets[selectedModel]?.topper || 'none';
+        const { selectedColorName, customColor, selectedTexture, userPhotoDataUrl } = getStoredState();
 
-        const colorPicker = document.getElementById('hat-color-picker');
-        if (colorPicker) {
-            colorPicker.value = customColor;
+        if (selectedColorName) {
+            const colorRadio = Array.from(document.querySelectorAll('input[name="hat_color"]'))
+                .find((el) => el.value === selectedColorName);
+            if (colorRadio) {
+                colorRadio.checked = true;
+                const colorPickerEl = document.getElementById('hat-color-picker');
+                if (colorPickerEl && hatColorHexMap[selectedColorName]) {
+                    colorPickerEl.value = hatColorHexMap[selectedColorName];
+                }
+            }
         }
 
-        const colorRadio = Array.from(document.querySelectorAll('input[name="hat_color"]'))
-            .find((el) => el.value === selectedColorName);
-        if (colorRadio) colorRadio.checked = true;
+        if (customColor) {
+            const colorPickerEl = document.getElementById('hat-color-picker');
+            if (colorPickerEl) {
+                colorPickerEl.value = customColor;
+                if (selectedColorName === CUSTOM_COLOR_VALUE) {
+                    const customRadio = document.getElementById('hat-custom-color-radio');
+                    if (customRadio) {
+                        customRadio.checked = true;
+                    }
+                }
+            }
+        }
 
-        const textureRadio = document.querySelector(`input[name="hat_texture"][value="${selectedTexture}"]`);
-        if (textureRadio) textureRadio.checked = true;
-
-        const modelRadio = document.querySelector(`input[name="hat_model"][value="${selectedModel}"]`);
-        if (modelRadio) modelRadio.checked = true;
-
-        const yarnRadio = document.querySelector(`input[name="yarn_type"][value="${selectedYarn}"]`);
-        if (yarnRadio) yarnRadio.checked = true;
-
-        const fitRadio = document.querySelector(`input[name="hat_fit"][value="${selectedFit}"]`);
-        if (fitRadio) fitRadio.checked = true;
-
-        const cuffRadio = document.querySelector(`input[name="hat_cuff"][value="${selectedCuff}"]`);
-        if (cuffRadio) cuffRadio.checked = true;
-
-        const topperRadio = document.querySelector(`input[name="hat_topper"][value="${selectedTopper}"]`);
-        if (topperRadio) topperRadio.checked = true;
+        if (selectedTexture) {
+            const textureRadio = Array.from(document.querySelectorAll('input[name="hat_texture"]'))
+                .find((el) => el.value === selectedTexture);
+            if (textureRadio) {
+                textureRadio.checked = true;
+            }
+        }
 
         setCustomColorPickerVisible(selectedColorName === CUSTOM_COLOR_VALUE);
+
+        if (userPhotoDataUrl) {
+            const hatUserPhoto = document.getElementById('hat-user-photo');
+            if (hatUserPhoto) hatUserPhoto.src = userPhotoDataUrl;
+        }
     }
 
-    document.querySelectorAll('input[name="hat_model"]').forEach((el) => {
-        el.addEventListener('change', () => {
-            applyModelPreset(el.value);
-            persistState({
-                selectedModel: el.value,
-                selectedYarn: getSelectedValue('yarn_type'),
-                selectedFit: getSelectedValue('hat_fit'),
-                selectedCuff: getSelectedValue('hat_cuff'),
-                selectedTopper: getSelectedValue('hat_topper'),
-            });
-            updateHatSummary();
-        });
-    });
+    function notifyPreviewOfColor(hex) {
+        document.dispatchEvent(new CustomEvent('hatColorUpdated', { detail: { color: hex } }));
+    }
+
+    function notifyPreviewOfTexture(texture) {
+        document.dispatchEvent(new CustomEvent('hatTextureUpdated', { detail: { texture } }));
+    }
+
+    const colorPicker = document.getElementById('hat-color-picker');
+    const customColorRadio = document.getElementById('hat-custom-color-radio');
 
     document.querySelectorAll('input[name="hat_color"]').forEach((el) => {
         el.addEventListener('change', () => {
             const colorPickerEl = document.getElementById('hat-color-picker');
             if (el.value === CUSTOM_COLOR_VALUE) {
                 if (colorPickerEl) {
-                    notifyPreview('hatColorUpdated', { color: colorPickerEl.value });
+                    notifyPreviewOfColor(colorPickerEl.value);
                 }
                 setCustomColorPickerVisible(true);
             } else if (colorPickerEl && hatColorHexMap[el.value]) {
                 colorPickerEl.value = hatColorHexMap[el.value];
-                notifyPreview('hatColorUpdated', { color: colorPickerEl.value });
+                notifyPreviewOfColor(colorPickerEl.value);
                 setCustomColorPickerVisible(false);
             }
             persistState({
@@ -566,26 +305,31 @@
         });
     });
 
-    document.querySelectorAll('input[name="hat_texture"], input[name="yarn_type"], input[name="hat_fit"], input[name="hat_cuff"], input[name="hat_topper"]').forEach((el) => {
+    document.querySelectorAll('input[name="hat_texture"]').forEach((el) => {
         el.addEventListener('change', () => {
-            syncPreviewState();
-            persistState({
-                selectedTexture: getSelectedValue('hat_texture'),
-                selectedYarn: getSelectedValue('yarn_type'),
-                selectedFit: getSelectedValue('hat_fit'),
-                selectedCuff: getSelectedValue('hat_cuff'),
-                selectedTopper: getSelectedValue('hat_topper'),
-            });
+            notifyPreviewOfTexture(el.value);
+            persistState({ selectedTexture: el.value });
             updateHatSummary();
         });
     });
 
-    const colorPicker = document.getElementById('hat-color-picker');
-    const customColorRadio = document.getElementById('hat-custom-color-radio');
+    document.querySelectorAll('.options-form input').forEach((el) => {
+        el.addEventListener('change', updateHatSummary);
+    });
+
+    const defaultColorRadio = document.querySelector('input[name="hat_color"]:checked');
+    if (colorPicker && defaultColorRadio && hatColorHexMap[defaultColorRadio.value]) {
+        colorPicker.value = hatColorHexMap[defaultColorRadio.value];
+    }
+
+    setCustomColorPickerVisible(defaultColorRadio?.value === CUSTOM_COLOR_VALUE);
+
     if (colorPicker) {
         colorPicker.addEventListener('input', (event) => {
-            if (customColorRadio) customColorRadio.checked = true;
-            notifyPreview('hatColorUpdated', { color: event.target.value });
+            if (customColorRadio) {
+                customColorRadio.checked = true;
+            }
+            notifyPreviewOfColor(event.target.value);
             persistState({
                 customColor: event.target.value,
                 selectedColorName: document.querySelector('input[name="hat_color"]:checked')?.value ?? CUSTOM_COLOR_VALUE,
@@ -594,8 +338,30 @@
         });
     }
 
+    const hatPhotoInput = document.getElementById('hat-photo-input');
+    const hatUserPhoto = document.getElementById('hat-user-photo');
+    
+    if (hatPhotoInput) {
+        hatPhotoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            const url = URL.createObjectURL(file);
+            hatUserPhoto.src = url;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                persistState({ userPhotoDataUrl: reader.result });
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
     applyStoredState();
-    syncPreviewState();
+    notifyPreviewOfColor(document.getElementById('hat-color-picker')?.value ?? '#b6a38f');
+    const initialTexture = document.querySelector('input[name="hat_texture"]:checked')?.value;
+    if (initialTexture) {
+        notifyPreviewOfTexture(initialTexture);
+    }
     updateHatSummary();
 </script>
 
@@ -619,293 +385,220 @@
     if (!previewContainer) {
         console.warn('Hat preview container not found; skipping 3D setup.');
     } else {
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
-        renderer.outputColorSpace = THREE.SRGBColorSpace;
-        renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = 1.08;
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(previewContainer.clientWidth, previewContainer.clientHeight);
-        renderer.domElement.classList.add('absolute', 'inset-0');
-        previewContainer.appendChild(renderer.domElement);
 
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xf8fafc);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.1;
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(previewContainer.clientWidth, previewContainer.clientHeight);
+    renderer.domElement.classList.add('absolute', 'inset-0');
+    previewContainer.appendChild(renderer.domElement);
 
-        const camera = new THREE.PerspectiveCamera(
-            34,
-            previewContainer.clientWidth / previewContainer.clientHeight,
-            0.01,
-            100,
-        );
-        camera.position.set(0.28, 0.22, 0.58);
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0xf8fafc);
 
-        const controls = new OrbitControls(camera, renderer.domElement);
-        controls.enableDamping = true;
-        controls.enablePan = false;
-        controls.target.set(0, 0.1, 0);
-        controls.minDistance = 0.28;
-        controls.maxDistance = 0.95;
+    const camera = new THREE.PerspectiveCamera(
+        34,
+        previewContainer.clientWidth / previewContainer.clientHeight,
+        0.01,
+        100,
+    );
+    camera.position.set(0.28, 0.22, 0.58);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 0.35));
-        scene.add(new THREE.HemisphereLight(0xffffff, 0x9fb3c8, 0.9));
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.enablePan = false;
+    controls.target.set(0, 0.1, 0);
+    controls.minDistance = 0.28;
+    controls.maxDistance = 0.95;
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-        directionalLight.position.set(2.5, 2.5, 2.5);
-        scene.add(directionalLight);
-        const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
-        fillLight.position.set(-2, 1.5, -1.5);
-        scene.add(fillLight);
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.35);
+    scene.add(ambientLight);
 
-        const textureLoader = new THREE.TextureLoader();
-        const texturePresets = {
-            knit: {
-                map: '{% static "3dmodels/winter-hat/textures/Hat_Diffuse_2K.png" %}',
-                normalMap: '{% static "3dmodels/winter-hat/textures/Hat_Normal_2K.png" %}',
-                aoMap: '{% static "3dmodels/winter-hat/textures/Hat_AO_2K.png" %}',
-                roughnessMap: '{% static "3dmodels/winter-hat/textures/Hat_Roughness_2K.png" %}',
-                roughness: 0.82,
-                metalness: 0.05,
-            },
-            flat: {
-                map: null,
-                normalMap: null,
-                aoMap: null,
-                roughnessMap: null,
-                roughness: 0.58,
-                metalness: 0.03,
-            },
-        };
+    const hemiLight = new THREE.HemisphereLight(0xffffff, 0x9fb3c8, 0.9);
+    scene.add(hemiLight);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+    directionalLight.position.set(2.5, 2.5, 2.5);
+    scene.add(directionalLight);
+    const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    fillLight.position.set(-2, 1.5, -1.5);
+    scene.add(fillLight);
 
-        const yarnPresets = {
-            'Меринос': { roughnessOffset: -0.05, emissive: 0.1 },
-            'Мохер': { roughnessOffset: 0.05, emissive: 0.12 },
-            'Кашемир': { roughnessOffset: -0.12, emissive: 0.07 },
-            'Букле': { roughnessOffset: 0.08, emissive: 0.13 },
-        };
-
-        const loadedTextures = {};
-
-        async function resolveTextureSet(key) {
-            if (loadedTextures[key]) return loadedTextures[key];
-            const preset = texturePresets[key];
-            if (!preset) return texturePresets.knit;
-            if (!preset.map) {
-                loadedTextures[key] = preset;
-                return preset;
-            }
-            const [map, normalMap, aoMap, roughnessMap] = await Promise.all([
-                textureLoader.loadAsync(preset.map),
-                textureLoader.loadAsync(preset.normalMap),
-                textureLoader.loadAsync(preset.aoMap),
-                textureLoader.loadAsync(preset.roughnessMap),
-            ]);
-            map.colorSpace = THREE.SRGBColorSpace;
-            loadedTextures[key] = { ...preset, map, normalMap, aoMap, roughnessMap };
-            return loadedTextures[key];
-        }
-
-        const material = new THREE.MeshStandardMaterial({
-            color: new THREE.Color('#1f2937'),
-            metalness: 0.05,
+    const textureLoader = new THREE.TextureLoader();
+    const texturePresets = {
+        knit: {
+            map: '{% static "3dmodels/winter-hat/textures/Hat_Diffuse_2K.png" %}',
+            normalMap: '{% static "3dmodels/winter-hat/textures/Hat_Normal_2K.png" %}',
+            aoMap: '{% static "3dmodels/winter-hat/textures/Hat_AO_2K.png" %}',
+            roughnessMap: '{% static "3dmodels/winter-hat/textures/Hat_Roughness_2K.png" %}',
             roughness: 0.82,
-            side: THREE.DoubleSide,
-            aoMapIntensity: 0.65,
-        });
-        const accentMaterial = material.clone();
+            metalness: 0.08,
+        },
+        flat: {
+            map: null,
+            normalMap: null,
+            aoMap: null,
+            roughnessMap: null,
+            roughness: 0.6,
+            metalness: 0.04,
+        },
+    };
 
-        let hatRoot = null;
-        let hatBaseY = -0.08;
-        let hatBaseScale = 0.52;
-        let pompomMesh = null;
-        let cuffMesh = null;
+    const loadedTextures = {};
 
-        function fitCameraToObject(object) {
-            const box = new THREE.Box3().setFromObject(object);
-            const size = box.getSize(new THREE.Vector3());
-            const center = box.getCenter(new THREE.Vector3());
-            const maxDim = Math.max(size.x, size.y, size.z) || 1;
-            const fov = THREE.MathUtils.degToRad(camera.fov);
-            let distance = (maxDim / 2) / Math.tan(fov / 2);
-            distance *= 1.18;
-            controls.target.copy(center);
-            camera.position.set(
-                center.x + distance * 0.16,
-                center.y + distance * 0.08,
-                center.z + distance * 0.78,
-            );
-            camera.near = Math.max(distance / 100, 0.01);
-            camera.far = Math.max(distance * 15, 10);
-            camera.updateProjectionMatrix();
-            controls.minDistance = distance * 0.58;
-            controls.maxDistance = distance * 1.65;
-            controls.update();
+    async function resolveTextureSet(key) {
+        if (loadedTextures[key]) return loadedTextures[key];
+
+        const preset = texturePresets[key];
+        if (!preset) return texturePresets.knit;
+
+        if (!preset.map) {
+            loadedTextures[key] = preset;
+            return preset;
         }
 
-        function ensureAccessories() {
-            if (!cuffMesh) {
-                cuffMesh = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.19, 0.22, 0.11, 48, 1, true),
-                    accentMaterial,
-                );
-                cuffMesh.rotation.x = Math.PI * 0.05;
-                cuffMesh.position.set(0.01, -0.135, 0.018);
-                cuffMesh.visible = false;
-                scene.add(cuffMesh);
-            }
+        const [map, normalMap, aoMap, roughnessMap] = await Promise.all([
+            textureLoader.loadAsync(preset.map),
+            textureLoader.loadAsync(preset.normalMap),
+            textureLoader.loadAsync(preset.aoMap),
+            textureLoader.loadAsync(preset.roughnessMap),
+        ]);
 
-            if (!pompomMesh) {
-                pompomMesh = new THREE.Mesh(
-                    new THREE.IcosahedronGeometry(0.055, 1),
-                    accentMaterial,
-                );
-                pompomMesh.position.set(0.005, 0.255, 0.005);
-                pompomMesh.visible = false;
-                scene.add(pompomMesh);
-            }
-        }
-
-        const state = {
-            color: document.getElementById('hat-color-picker')?.value ?? '#1f2937',
-            texture: document.querySelector('input[name="hat_texture"]:checked')?.value ?? 'knit',
-            style: document.querySelector('input[name="hat_model"]:checked')?.value ?? 'classic',
-            fit: document.querySelector('input[name="hat_fit"]:checked')?.value ?? 'standard',
-            cuff: document.querySelector('input[name="hat_cuff"]:checked')?.value ?? 'medium',
-            topper: document.querySelector('input[name="hat_topper"]:checked')?.value ?? 'none',
-            yarn: document.querySelector('input[name="yarn_type"]:checked')?.value ?? 'Меринос',
+        map.colorSpace = THREE.SRGBColorSpace;
+        loadedTextures[key] = {
+            ...preset,
+            map,
+            normalMap,
+            aoMap,
+            roughnessMap,
         };
 
-        function updateGeometry() {
-            if (!hatRoot) return;
-            ensureAccessories();
+        return loadedTextures[key];
+    }
 
-            const isExtended = state.fit === 'extended' || state.style === 'slouchy';
-            hatRoot.scale.setScalar(hatBaseScale);
-            hatRoot.scale.y = hatBaseScale * (isExtended ? 1.22 : 1);
-            hatRoot.position.set(0, hatBaseY + (isExtended ? -0.01 : 0), 0);
-            hatRoot.rotation.y = Math.PI * 0.24;
+    const material = new THREE.MeshStandardMaterial({
+        color: new THREE.Color('#b6a38f'),
+        metalness: 0.08,
+        roughness: 0.82,
+        side: THREE.DoubleSide,
+        aoMapIntensity: 0.65,
+    });
 
-            if (cuffMesh) {
-                const cuffLevel = state.cuff;
-                cuffMesh.visible = cuffLevel !== 'none';
-                cuffMesh.rotation.y = hatRoot.rotation.y;
-                if (cuffLevel === 'high') {
-                    cuffMesh.scale.set(1.05, 1.18, 1.05);
-                    cuffMesh.position.set(0.01, -0.112, 0.018);
-                } else {
-                    cuffMesh.scale.set(1, 1, 1);
-                    cuffMesh.position.set(0.01, -0.135, 0.018);
-                }
-            }
+    function fitCameraToObject(object) {
+        const box = new THREE.Box3().setFromObject(object);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxDim = Math.max(size.x, size.y, size.z) || 1;
+        const fov = THREE.MathUtils.degToRad(camera.fov);
+        let distance = (maxDim / 2) / Math.tan(fov / 2);
+        distance *= 1.18;
 
-            if (pompomMesh) {
-                const topper = state.topper;
-                pompomMesh.visible = topper !== 'none';
-                pompomMesh.rotation.y = hatRoot.rotation.y;
-                const size = topper === 'large' ? 1.18 : 0.8;
-                pompomMesh.scale.setScalar(size);
-                pompomMesh.position.set(0.004, isExtended ? 0.31 : 0.265, 0.003);
-            }
-        }
-
-        async function refreshMaterial() {
-            const textureSet = await resolveTextureSet(state.texture);
-            const yarnPreset = yarnPresets[state.yarn] || yarnPresets['Меринос'];
-
-            material.color.set(state.color ?? '#1f2937');
-            material.emissive.set(state.color ?? '#1f2937').multiplyScalar(yarnPreset.emissive ?? 0.1);
-            material.emissiveIntensity = 0.82;
-            material.map = textureSet.map ?? null;
-            material.normalMap = textureSet.normalMap ?? null;
-            material.aoMap = textureSet.aoMap ?? null;
-            material.roughnessMap = textureSet.roughnessMap ?? null;
-            material.roughness = Math.max(0.22, Math.min(1, (textureSet.roughness ?? 0.8) + (yarnPreset.roughnessOffset ?? 0)));
-            material.metalness = textureSet.metalness ?? 0.05;
-            material.aoMapIntensity = textureSet.aoMap ? 0.65 : 0.4;
-            material.needsUpdate = true;
-
-            accentMaterial.copy(material);
-            accentMaterial.needsUpdate = true;
-            updateGeometry();
-        }
-
-        document.addEventListener('hatColorUpdated', (event) => {
-            state.color = event.detail?.color ?? state.color;
-            refreshMaterial();
-        });
-
-        document.addEventListener('hatTextureUpdated', (event) => {
-            state.texture = event.detail?.texture ?? state.texture;
-            refreshMaterial();
-        });
-
-        document.addEventListener('hatStyleUpdated', (event) => {
-            state.style = event.detail?.style ?? state.style;
-            state.fit = event.detail?.fit ?? state.fit;
-            state.cuff = event.detail?.cuff ?? state.cuff;
-            state.topper = event.detail?.topper ?? state.topper;
-            state.yarn = event.detail?.yarn ?? state.yarn;
-            refreshMaterial();
-        });
-
-        const objLoader = new OBJLoader();
-        const modelUrl = '{% static "3dmodels/winter-hat/source/Hat/Hat_Final_LoPoly.OBJ" %}';
-        objLoader.load(
-            modelUrl,
-            (obj) => {
-                hatRoot = obj;
-                obj.traverse((child) => {
-                    if (child.isMesh) {
-                        child.geometry.computeVertexNormals();
-                        if (child.geometry.attributes.uv && !child.geometry.attributes.uv2) {
-                            child.geometry.setAttribute('uv2', child.geometry.attributes.uv);
-                        }
-                        child.material = material;
-                    }
-                });
-                obj.scale.setScalar(hatBaseScale);
-                obj.position.set(0, hatBaseY, 0);
-                obj.rotation.y = Math.PI * 0.24;
-                scene.add(obj);
-                ensureAccessories();
-                fitCameraToObject(obj);
-                refreshMaterial();
-                if (loaderOverlay) loaderOverlay.classList.add('hidden');
-            },
-            undefined,
-            (error) => {
-                console.error('Не удалось загрузить модель шапки', error);
-                if (loaderOverlay) {
-                    loaderOverlay.innerHTML = '<span class="text-red-500">Не удалось загрузить модель</span>';
-                }
-            },
+        controls.target.copy(center);
+        camera.position.set(
+            center.x + distance * 0.16,
+            center.y + distance * 0.08,
+            center.z + distance * 0.78,
         );
+        camera.near = Math.max(distance / 100, 0.01);
+        camera.far = Math.max(distance * 15, 10);
+        camera.updateProjectionMatrix();
+        controls.minDistance = distance * 0.58;
+        controls.maxDistance = distance * 1.65;
+        controls.update();
+    }
 
-        window.hatPreviewController = {
-            async getReferenceImage() {
-                const previousBackground = scene.background;
-                scene.background = null;
-                renderer.render(scene, camera);
-                const dataUrl = renderer.domElement.toDataURL('image/png');
-                scene.background = previousBackground;
-                renderer.render(scene, camera);
-                return dataUrl;
-            },
-        };
+    let hatRoot = null;
+    const objLoader = new OBJLoader();
+    const modelUrl = '{% static "3dmodels/winter-hat/source/Hat/Hat_Final_LoPoly.OBJ" %}';
 
-        window.addEventListener('resize', () => {
-            const { clientWidth, clientHeight } = previewContainer;
-            renderer.setSize(clientWidth, clientHeight);
-            camera.aspect = clientWidth / clientHeight;
-            camera.updateProjectionMatrix();
-        });
+    objLoader.load(
+        modelUrl,
+        (obj) => {
+            hatRoot = obj;
+            obj.traverse((child) => {
+                if (child.isMesh) {
+                    child.geometry.computeVertexNormals();
+                    if (child.geometry.attributes.uv && !child.geometry.attributes.uv2) {
+                        child.geometry.setAttribute('uv2', child.geometry.attributes.uv);
+                    }
+                    child.material = material;
+                }
+            });
+            obj.scale.setScalar(0.52);
+            obj.position.set(0, -0.08, 0);
+            obj.rotation.y = Math.PI * 0.24;
+            scene.add(obj);
+            fitCameraToObject(obj);
+            if (loaderOverlay) loaderOverlay.classList.add('hidden');
+        },
+        undefined,
+        (error) => {
+            console.error('Не удалось загрузить модель шапки', error);
+            if (loaderOverlay) {
+                loaderOverlay.innerHTML = '<span class="text-red-500">Не удалось загрузить модель</span>';
+            }
+        },
+    );
 
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
+    const state = {
+        color: document.getElementById('hat-color-picker')?.value ?? '#b6a38f',
+        texture: document.querySelector('input[name="hat_texture"]:checked')?.value ?? 'knit',
+    };
+
+    async function refreshMaterial() {
+        const textureSet = await resolveTextureSet(state.texture);
+        material.color.set(state.color ?? '#b6a38f');
+        material.emissive.set(state.color ?? '#b6a38f').multiplyScalar(0.1);
+        material.emissiveIntensity = 0.8;
+        material.map = textureSet.map ?? null;
+        material.normalMap = textureSet.normalMap ?? null;
+        material.aoMap = textureSet.aoMap ?? null;
+        material.roughnessMap = textureSet.roughnessMap ?? null;
+        material.roughness = textureSet.roughness ?? 0.8;
+        material.metalness = textureSet.metalness ?? 0.05;
+        material.aoMapIntensity = textureSet.aoMap ? 0.65 : 0.4;
+        material.needsUpdate = true;
+    }
+
+    document.addEventListener('hatColorUpdated', (event) => {
+        state.color = event.detail?.color ?? state.color;
+        refreshMaterial();
+    });
+
+    document.addEventListener('hatTextureUpdated', (event) => {
+        state.texture = event.detail?.texture ?? state.texture;
+        refreshMaterial();
+    });
+
+    refreshMaterial();
+
+    window.hatPreviewController = {
+        async getReferenceImage() {
+            const previousBackground = scene.background;
+            scene.background = null;
             renderer.render(scene, camera);
-        }
+            const dataUrl = renderer.domElement.toDataURL('image/png');
+            scene.background = previousBackground;
+            renderer.render(scene, camera);
+            return dataUrl;
+        },
+    };
 
-        animate();
+    window.addEventListener('resize', () => {
+        const { clientWidth, clientHeight } = previewContainer;
+        renderer.setSize(clientWidth, clientHeight);
+        camera.aspect = clientWidth / clientHeight;
+        camera.updateProjectionMatrix();
+    });
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update();
+        renderer.render(scene, camera);
+    }
+
+    animate();
     }
 </script>
 
@@ -921,10 +614,6 @@
             downloadLinkId: 'hat-download-link',
             warningId: 'hat-tryon-warning',
             quotaId: 'hat-tryon-quota',
-            dropzoneId: 'hat-upload-dropzone',
-            replaceTriggerId: 'hat-upload-replace',
-            userFrameId: 'hat-user-frame',
-            aiFrameId: 'hat-ai-frame',
             isAuthenticated: {{ request.user.is_authenticated|yesno:'true,false' }},
             canGenerate: {{ tryon_can_generate|yesno:'true,false' }},
             disabledReason: '{{ tryon_disabled_reason|escapejs }}',
@@ -951,14 +640,9 @@
             },
             getSelections() {
                 return {
-                    model: getSelectedValue('hat_model'),
-                    color_name: getSelectedValue('hat_color'),
+                    color_name: document.querySelector('input[name="hat_color"]:checked')?.value || '',
                     color_hex: document.getElementById('hat-color-picker')?.value || '',
-                    yarn_type: getSelectedValue('yarn_type'),
-                    texture: getSelectedValue('hat_texture'),
-                    fit: getSelectedValue('hat_fit'),
-                    cuff: getSelectedValue('hat_cuff'),
-                    topper: getSelectedValue('hat_topper'),
+                    texture: document.querySelector('input[name="hat_texture"]:checked')?.value || '',
                 };
             },
             onUserImageChange(dataUrl) {
